@@ -6,12 +6,12 @@
 <meta name="theme-color" content="#060a17">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Gamify Agent">
+<meta name="apple-mobile-web-app-title" content="HOG Gamify Anything">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<title>Gamify Agent</title>
+<title>HOG Gamify Anything</title>
 <style>
 :root{--bg:#060a17;--bg2:#0d1430;--card:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);--tx:#e8ecff;--mut:#93a0c8;--acc:#22d3ee;--acc2:#a78bfa;--good:#34d399;--bad:#fb7185;--gold:#fbbf24;--in:#0a1230;--sheet:#0d1430;--top:#060a17cc;--soft:#ffffff0d;--soft2:#ffffff14;--onacc:#04111f}
 :root[data-theme=deep]{--bg:#000;--bg2:#000;--card:#0a0a0d;--line:rgba(255,255,255,.1);--tx:#f2f4ff;--mut:#8b93b3;--in:#000;--sheet:#050507;--top:#000000ee;--soft:#ffffff08;--soft2:#ffffff10}
@@ -207,11 +207,11 @@ tr:hover td{background:var(--soft)}
 <body>
 <div id="top">
   <button class="pill" id="menubtn" style="display:none" onclick="toggleSide()" aria-label="menu">☰</button>
-  <div class="brand"><div class="logo">🎮</div><span>Gamify Agent</span></div>
+  <div class="brand"><div class="logo">🎮</div><span>HOG Gamify Anything</span></div>
   <div class="sp"></div>
   <button class="pill" id="homebtn" style="display:none" onclick="goHome()">🏠</button><button class="pill" id="aibtn" onclick="aiSettings()">🔌 AI ○</button><button class="pill" id="thbtn" onclick="toggleTheme()">🌙</button><button class="pill" id="langbtn" onclick="toggleUI()">العربية</button>
 </div>
-<aside id="side"><div class="shead"><div class="logo">🎮</div><span style="flex:1">Gamify Agent</span><button class="pill" onclick="toggleSide(false)">✕</button></div><div id="nav"></div><div id="sfoot"></div></aside><div id="scrim" onclick="toggleSide(false)"></div>
+<aside id="side"><div class="shead"><div class="logo">🎮</div><span style="flex:1">HOG Gamify Anything</span><button class="pill" onclick="toggleSide(false)">✕</button></div><div id="nav"></div><div id="sfoot"></div></aside><div id="scrim" onclick="toggleSide(false)"></div>
 <div id="stage"></div>
 <div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div id="mbody"></div></div>
 <div id="toast"></div>
@@ -388,10 +388,10 @@ function goHome(force){if(force!==true&&G&&G.live&&G.view!=='end'){showModal(`<d
 function nav(){const n=$('#nav');document.body.classList.toggle('hasside',!!LOGGED);const mb=$('#menubtn');if(mb)mb.style.display=LOGGED?'':'none';const hb=$('#homebtn');if(hb)hb.style.display=LOGGED?'inline-block':'none';
  if(!LOGGED){n.innerHTML='';$('#sfoot').innerHTML='';return}
  const lk=k=>k&&!can(k)?'<span class="lk">🔒</span>':'';
- const inGame=!!(G&&G.live);const grp=[[tr('Agent','الوكيل'),inGame?[['agent','🎮',tr('Back to game','العودة للعبة')],['home','💬',tr('Agent chat','محادثة الوكيل')]]:[['agent','💬',tr('Agent chat','محادثة الوكيل')]]],[tr('Play','اللعب'),[['bank','🏦',tr('Points Bank','بنك النقاط')],['market','🛒',tr('Cards Market','سوق البطاقات')],['genius','🌟',tr('Genius Area','منطقة العباقرة')],['board','🏆',tr('Hall of Fame','لوحة الشرف')],['qbank','📚',tr('Question Bank','بنك الأسئلة'),'bank']]],[tr('Account','الحساب'),[['plans','💎',tr('Plans','الخطط')],['terms','📜',tr('Game Terms','شروط اللعبة')]]]];
+ const inGame=!!(G&&G.live);const grp=[[tr('Agent','الوكيل'),inGame?[['agent','🎮',tr('Back to game','العودة للعبة')],['home','💬',tr('Agent chat','محادثة الوكيل')]]:[['agent','💬',tr('Agent chat','محادثة الوكيل')]]],[tr('Play','اللعب'),[['bank','🏦',tr('Points Bank','بنك النقاط')],['market','🛒',tr('Cards Market','سوق البطاقات')],['genius','🌟',tr('Genius Area','منطقة العباقرة')],['board','🏆',tr('Hall of Fame','لوحة الشرف')],['qbank','📚',tr('Question Bank','بنك الأسئلة'),'bank'],['puzzles','🧩',tr('Puzzle Bank','بنك الألغاز'),'puzzles']]],[tr('Account','الحساب'),[['plans','💎',tr('Plans','الخطط')],['terms','📜',tr('Game Terms','شروط اللعبة')]]]];
  n.innerHTML=grp.map(g=>`<div class="sgrp">${g[0]}</div>`+g[1].map(t=>`<button class="sitem ${TAB===t[0]?'on':''}" onclick="go('${t[0]}')"><span class="si">${t[1]}</span><span>${t[2]}</span>${lk(t[3])}</button>`).join('')).join('');
- const p=PLANS[planIdx()];$('#sfoot').innerHTML=`<div class="planpill"><div class="mut" style="font-size:11px">${tr('Current plan','الباقة الحالية')}</div><b>${p.icon} ${esc(L(p.n))}</b><button class="btn sm" style="width:100%;margin-top:8px" onclick="go('plans')">💎 ${planIdx()<2?tr('See upgrades','شاهد الترقيات'):tr('Plans','الخطط')}</button></div>${SB.user?`<button class="btn alt sm" style="width:100%;margin-top:8px" onclick="accountModal()">👤 ${esc(SB.user.email||'')}</button>`:(SB.cfg?`<button class="btn alt sm" style="width:100%;margin-top:8px" onclick="SB.guest=false;LOGGED=false;nav();loginView()">🔑 ${tr('Sign in to sync','سجّل الدخول للمزامنة')}</button>`:'')}${isStandalone()?'':`<button class="btn alt sm" style="width:100%;margin-top:8px" onclick="installApp()">📲 ${tr('Install app','ثبّت التطبيق')}</button>`}`}
-function go(t){if(t==='home')return goHome();TAB=t;toggleSide(false);nav();clearTimer();({agent:()=>(G&&G.live?renderGame():home()),bank:bankView,market:marketView,genius:geniusView,qbank:qbView,board:boardView,terms:termsView,plans:plansView})[t]()}
+ const p=PLANS[planIdx()];$('#sfoot').innerHTML=`<div class="planpill"><div class="mut" style="font-size:11px">${tr('Current plan','الباقة الحالية')}</div><b>${p.icon} ${esc(L(p.n))}</b><button class="btn sm" style="width:100%;margin-top:8px" onclick="go('plans')">💎 ${planIdx()<3?tr('See upgrades','شاهد الترقيات'):tr('Plans','الخطط')}</button></div>${SB.user?`<button class="btn alt sm" style="width:100%;margin-top:8px" onclick="accountModal()">👤 ${esc(SB.user.email||'')}</button>`:(SB.cfg?`<button class="btn alt sm" style="width:100%;margin-top:8px" onclick="SB.guest=false;LOGGED=false;nav();loginView()">🔑 ${tr('Sign in to sync','سجّل الدخول للمزامنة')}</button>`:'')}${isStandalone()?'':`<button class="btn alt sm" style="width:100%;margin-top:8px" onclick="installApp()">📲 ${tr('Install app','ثبّت التطبيق')}</button>`}`}
+function go(t){if(t==='home')return goHome();TAB=t;toggleSide(false);nav();clearTimer();({agent:()=>(G&&G.live?renderGame():home()),bank:bankView,market:marketView,genius:geniusView,qbank:qbView,board:boardView,terms:termsView,plans:plansView,puzzles:puzzlesView})[t]()}
 let LASTKEY='',PREV={},PREVW={};
 function stage(h,key){const el=$('#stage');el.innerHTML=h;chatVis(key==='home');let k=key;if(!k){k=TAB+'|'+(G&&G.view?G.view+((G.q&&G.q.q&&G.q.q.q)?((G.q.q.q.en||G.q.q.q.ar||'').slice(0,14)+G.q.step):''):'')}
  if(k!==LASTKEY){el.classList.remove('enter');void el.offsetWidth;el.classList.add('enter');window.scrollTo({top:0})}LASTKEY=k;animateNums()}
@@ -404,7 +404,7 @@ function toggleTheme(){const o=['dark','deep','light'],c=document.documentElemen
 function loginView(){TAB='login';
  if(!CODE)CODE=String(Math.floor(1000+Math.random()*9000));
  stage(`<div class="card" style="margin-top:30px;text-align:center"><div class="big">🔐</div><h3>${tr('Confirm your login','تأكيد تسجيل الدخول')}</h3>
- <p class="mut">${tr('Type the code shown below to enter Gamify Agent.','اكتب الكود الظاهر بالأسفل للدخول إلى وكيل الألعاب.')}</p>
+ <p class="mut">${tr('Type the code shown below to enter HOG Gamify Anything.','اكتب الكود الظاهر بالأسفل للدخول إلى وكيل الألعاب.')}</p>
  <div class="codebox" dir="ltr">${CODE}</div>
  <input id="lc" inputmode="numeric" maxlength="4" placeholder="••••" dir="ltr" style="text-align:center;font-size:24px;letter-spacing:8px" onkeydown="if(event.key==='Enter')doLogin()">
  <div class="row" style="margin-top:12px;justify-content:center"><button class="btn" onclick="doLogin()">${tr('Enter','دخول')}</button><button class="btn alt" onclick="CODE='';loginView()">${tr('New code','كود جديد')}</button></div></div>`);
@@ -419,7 +419,7 @@ function userMsg(t){const d=document.createElement('div');d.className='msg me';d
 function allTpls(){const base=Object.keys(TPL).map(id=>({id,...TPL[id]}));const c=customs().map(c=>({id:c.id,custom:true,icon:c.icon||'🧪',name:{en:c.name,ar:c.name},desc:{en:c.desc||`Custom · ${c.qs.length} questions`,ar:c.desc||`قالب مخصص · ${c.qs.length} سؤال`},langs:[c.lang],gateWord:{en:'Category',ar:'الفئة'},gates:c.gates.map((g,i)=>({id:'g'+i,icon:'🎯',n:{en:g,ar:g}})),ai:c.qs.some(q=>q.cat==='ai')?{icon:'🤖',n:{en:'AI Host',ar:'المحاوِر الذكي'}}:null,qs:c.qs}));const bt=qbTemplate();return base.concat(bt?[bt]:[],c)}
 function home(){
  G=G&&G.live?G:null;TAB='agent';nav();feedInit();
- agentMsg(`<b>${tr('Hi! I\'m Gamify Agent.','أهلًا! أنا وكيل الألعاب.')}</b><br>${tr('I turn any content into a real 2-player competition. One shared engine, three ready templates, and you can build your own. What shall we build?','أحوّل أي محتوى إلى مسابقة حقيقية بين لاعبين. محرّك واحد مشترك، ثلاثة قوالب جاهزة، ويمكنك بناء قالبك الخاص. ماذا نبني اليوم؟')}
+ agentMsg(`<b>${tr('Hi! I\'m HOG Gamify Anything.','أهلًا! أنا وكيل الألعاب.')}</b><br>${tr('I turn any content into a real 2-player competition. One shared engine, three ready templates, and you can build your own. What shall we build?','أحوّل أي محتوى إلى مسابقة حقيقية بين لاعبين. محرّك واحد مشترك، ثلاثة قوالب جاهزة، ويمكنك بناء قالبك الخاص. ماذا نبني اليوم؟')}
  <div class="tpls">${allTpls().map(t=>`<button class="tpl" onclick="pickTpl('${t.id}')"><div class="ic">${t.icon}</div><b>${templateOk(t.id)?'':'🔒 '}${esc(L(t.name))}</b><span class="mut">${esc(L(t.desc))}</span></button>`).join('')}
  <button class="tpl" style="border-style:dashed" onclick="builderView()"><div class="ic">➕</div><b>${can('builder')?'':'🔒 '}${tr('Build a template','ابنِ قالبًا')}</b><span class="mut">${tr('Your own categories + questions, same core engine','فئاتك وأسئلتك الخاصة على نفس المحرّك')}</span></button></div>
  ${customs().length?`<div class="lbl">${tr('My templates','قوالبي')}</div>${customs().map(c=>`<div class="row" style="padding:6px 0"><span>${c.icon||'🧪'} <b>${esc(c.name)}</b></span><span class="sp"></span><button class="btn alt sm" onclick="editCustom('${c.id}')">✏️</button><button class="btn alt sm" onclick="delCustom('${c.id}')">🗑</button></div>`).join('')}`:''}`);
@@ -1080,10 +1080,12 @@ function selfTest(){const R=[];const T=(n,f)=>{try{const r=f();R.push([n,r===tru
 
 /* ============ v7: PLANS (free / paid), locks, upgrade modal ============ */
 const PLANS=[
- {id:0,icon:'🌱',n:{en:'Starter',ar:'المبتدئ'},tag:{en:'Try the engine, free',ar:'جرّب المحرّك مجانًا'},who:{en:'For curious teachers and first-time players',ar:'للمعلم الفضولي واللاعب الجديد'}},
- {id:1,icon:'⚡',n:{en:'Creator',ar:'المبدع'},tag:{en:'Build your own games',ar:'ابنِ ألعابك الخاصة'},who:{en:'For teachers, coaches and game creators',ar:'للمعلمين والمدربين وصنّاع الألعاب'}},
- {id:2,icon:'🏫',n:{en:'Institution',ar:'المؤسسات'},tag:{en:'Run a whole game center',ar:'أدِر مركز ألعاب كاملًا'},who:{en:'For schools, mosques, academies and organizers',ar:'للمدارس والمساجد والأكاديميات والمنظّمين'}}
+ {id:0,icon:'🌱',n:{en:'Starter',ar:'المبتدئ'},tag:{en:'Try the engine, free',ar:'جرّب المحرّك مجانًا'},who:{en:'For curious teachers and first-time players',ar:'للمعلم الفضولي واللاعب الجديد'},price:{m:0,y:0}},
+ {id:1,icon:'⚡',n:{en:'Creator',ar:'المبدع'},tag:{en:'Build your own games',ar:'ابنِ ألعابك الخاصة'},who:{en:'For teachers, coaches and game creators',ar:'للمعلمين والمدربين وصنّاع الألعاب'},price:{m:4.99,y:39}},
+ {id:2,icon:'🧑‍🏫',n:{en:'Teacher Pro',ar:'المعلّم برو'},tag:{en:'Run classes with points',ar:'أدِر فصولك بنظام النقاط'},who:{en:'For teachers who run real classes every week',ar:'للمعلمين الذين يديرون فصولًا حقيقية كل أسبوع'},price:{m:9.99,y:79}},
+ {id:3,icon:'🏫',n:{en:'Institution',ar:'المؤسسات'},tag:{en:'Run a whole game center',ar:'أدِر مركز ألعاب كاملًا'},who:{en:'For schools, mosques, academies and organizers',ar:'للمدارس والمساجد والأكاديميات والمنظّمين'},price:{m:29,y:249}}
 ];
+
 const FEAT={
  core:{t:0,i:'🎮',en:'2-player game engine · 5000 pts · timers · value ladders',ar:'محرّك لعبة للاعبين · ٥٠٠٠ نقطة · مؤقتات · سلالم قيم'},
  edu:{t:0,i:'🎓',en:'Education template (English + Arabic)',ar:'قالب التعليم (عربي + إنجليزي)'},
@@ -1101,12 +1103,20 @@ const FEAT={
  bank:{t:1,i:'🏦',en:'Question Bank + quality judge (diamond)',ar:'بنك الأسئلة وحَكَم الجودة (الماسة)'},
  genius_modes:{t:1,i:'🌟',en:'Genius challenges (Sudden Death, IQ Matrix, 5-Second)',ar:'تحديات العباقرة (الموت المفاجئ، مصفوفة الذكاء، ٥ ثوانٍ)'},
  reports:{t:1,i:'📄',en:'Reports and game-pack downloads',ar:'تحميل التقارير وحزم الألعاب'},
+ badge:{t:0,i:'🏷️',en:'Games you export carry a small "Made with HOG" badge',ar:'الألعاب المصدّرة تحمل شارة صغيرة «صُنع بـ HOG»'},
+ nobadge:{t:1,i:'🚫',en:'No HOG badge on your exported games',ar:'بدون شارة HOG على ألعابك المصدّرة'},
+ bankSearch:{t:1,i:'🔎',en:'Agent searches the question bank for your game (no files needed)',ar:'الوكيل يبحث في بنك الأسئلة للعبتك (بدون رفع ملفات)'},
+ puzzles:{t:1,i:'🧩',en:'Puzzle Bank + the agent designs new puzzles',ar:'بنك الألغاز + الوكيل يصمّم ألغازًا جديدة'},
+ export_basic:{t:1,i:'📤',en:'Export questions as PDF worksheet, CSV and JSON',ar:'تصدير الأسئلة كورقة PDF وCSV وJSON'},
+ export_docs:{t:2,i:'📝',en:'Export to Word and PowerPoint',ar:'التصدير إلى Word وPowerPoint',soon:1},
+ export_scorm:{t:3,i:'🎓',en:'SCORM export for school learning platforms',ar:'تصدير SCORM لمنصات التعلم المدرسية',soon:1},
+ share_link:{t:1,i:'🔗',en:'Share your game with a link / QR',ar:'شارك لعبتك برابط / QR',soon:1},
  cloud:{t:1,i:'☁️',en:'Cloud sync across devices',ar:'مزامنة سحابية بين الأجهزة'},
  classes:{t:2,i:'🏫',en:'Class management + points system (attitude / performance)',ar:'إدارة الحصص ونظام النقاط (السلوك / الأداء)',soon:1},
  supervisor:{t:2,i:'🧑‍🏫',en:'Supervisor dashboard + shared card bank',ar:'لوحة المشرف وبنك بطاقات مشترك',soon:1},
- tourney:{t:2,i:'👑',en:'Tournaments + MVG title events',ar:'بطولات وفعاليات لقب MVG',soon:1},
- hosts:{t:2,i:'🎙️',en:'Human host + AI host championship mode',ar:'نمط بطولة: محاوِر بشري + محاوِر ذكي',soon:1},
- sponsors:{t:2,i:'🤝',en:'Sponsor slots and organization branding',ar:'مساحات رعاة وهوية المؤسسة',soon:1}
+ tourney:{t:3,i:'👑',en:'Tournaments + MVG title events',ar:'بطولات وفعاليات لقب MVG',soon:1},
+ hosts:{t:3,i:'🎙️',en:'Human host + AI host championship mode',ar:'نمط بطولة: محاوِر بشري + محاوِر ذكي',soon:1},
+ sponsors:{t:3,i:'🤝',en:'Sponsor slots and organization branding',ar:'مساحات رعاة وهوية المؤسسة',soon:1}
 };
 const planIdx=()=>+(SB.user&&SB.plan!=null?SB.plan:(store('ga_plan')||0));
 const can=k=>{const f=FEAT[k];return !f||f.t<=planIdx()};
@@ -1117,7 +1127,7 @@ function showUpgrade(k){const f=FEAT[k]||FEAT.tpl_all,p=PLANS[f.t];
  <div class="row" style="justify-content:center;margin-top:8px"><button class="btn" onclick="closeModal();go('plans')">💎 ${tr('View plans','عرض الخطط')}</button><button class="btn alt" onclick="closeModal();setPlan(${f.t})">👁 ${tr('Preview this plan','معاينة هذه الباقة')}</button><button class="btn alt" onclick="closeModal()">${tr('Not now','ليس الآن')}</button></div>`);return false}
 function lockCard(k){const f=FEAT[k],p=PLANS[f.t];return `<div class="card" style="text-align:center"><div class="big">🔒</div><h3>${f.i} ${esc(L(f))}</h3><p class="mut">${tr('Included in the','ضمن باقة')} ${p.icon} ${esc(L(p.n))}</p><div class="row" style="justify-content:center"><button class="btn" onclick="go('plans')">💎 ${tr('View plans','عرض الخطط')}</button><button class="btn alt" onclick="setPlan(${f.t});go('plans')">👁 ${tr('Preview','معاينة')}</button></div></div>`}
 function pcard(p,cur){const own=Object.keys(FEAT).filter(k=>FEAT[k].t===p.id);const prev=p.id?PLANS[p.id-1]:null;
- return `<div class="pcard ${cur===p.id?'cur':''}"><div class="pic">${p.icon}</div><h3>${esc(L(p.n))}</h3><div class="mut" style="min-height:34px">${esc(L(p.tag))}</div><div class="mut" style="font-size:12px;margin-top:2px">${esc(L(p.who))}</div>
+ return `<div class="pcard ${cur===p.id?'cur':''}"><div class="pic">${p.icon}</div><h3>${esc(L(p.n))}</h3><div style="font-weight:800;font-size:18px;margin:2px 0">${p.price.m?`$${p.price.m}<small class="mut">/${tr('mo','شهر')}</small> · $${p.price.y}<small class="mut">/${tr('yr','سنة')}</small>`:tr('Free','مجانًا')}</div><div class="mut" style="min-height:34px">${esc(L(p.tag))}</div><div class="mut" style="font-size:12px;margin-top:2px">${esc(L(p.who))}</div>
  ${prev?`<div class="badge" style="margin:10px 0 4px">＋ ${tr('Everything in','كل ما في')} ${esc(L(prev.n))}</div>`:'<div style="height:10px"></div>'}
  <ul class="flist">${own.map(k=>`<li><span>${FEAT[k].i}</span><span>${esc(L(FEAT[k]))}${FEAT[k].soon?` <span class="tag p">🔜 ${tr('soon','قريبًا')}</span>`:''}</span></li>`).join('')}</ul>
  <button class="btn ${cur===p.id?'alt':''}" style="width:100%;margin-top:10px" onclick="setPlan(${p.id})">${cur===p.id?'✓ '+tr('Current preview','المعاينة الحالية'):tr('Preview this plan','معاينة هذه الباقة')}</button></div>`}
@@ -1219,6 +1229,8 @@ async function chatSend(){
  if(ATT.length>1&&!can('multifile'))return showUpgrade('multifile');
  const files=ATT.slice();ATT=[];chatAtt();ta.value='';chatGrow(ta);
  userMsg((text.length>400?text.slice(0,400)+'…':text)+(files.length?'\n📎 '+files.map(f=>f.name).join(', '):''));
+ RX.pz=/puzzle|riddle|لغز|ألغاز|الغاز/i;
+ if(!files.length&&RX.pz.test(text)&&!RX.mk.test(text)&&text.length<=120)return go('puzzles');
  if(!files.length&&llmReady()&&RX.mk.test(text)&&!RX.builder.test(text))return runMission(text);
  if(!files.length&&text.length<=160){
   if(RX.builder.test(text))return builderView();
@@ -1232,7 +1244,7 @@ async function chatSend(){
  }
  return chatMaterials(files,text);
 }
-async function chatLLM(text){const b=agentMsg('<span class="spin"></span>');try{const r=await llmRaw(`You are Gamify Agent, a friendly assistant that builds 2-player quiz competitions (Education, Quran, Sports templates, custom templates, uploaded materials). Reply in the user's language in at most 4 short sentences and suggest one concrete next step.\nUser: ${text}`,400);b.innerHTML=esc(r).replace(/\n/g,'<br>');voiceSay(r)}catch(e){b.innerHTML=esc(tr('AI unavailable: ','الذكاء الاصطناعي غير متاح: ')+e.message)}}
+async function chatLLM(text){const b=agentMsg('<span class="spin"></span>');try{const r=await llmRaw(`You are HOG Gamify Anything, a friendly assistant that builds 2-player quiz competitions (Education, Quran, Sports templates, custom templates, uploaded materials). Reply in the user's language in at most 4 short sentences and suggest one concrete next step.\nUser: ${text}`,400);b.innerHTML=esc(r).replace(/\n/g,'<br>');voiceSay(r)}catch(e){b.innerHTML=esc(tr('AI unavailable: ','الذكاء الاصطناعي غير متاح: ')+e.message)}}
 async function chatMaterials(files,text){
  const b=agentMsg('<div class="run" id="crun"></div>');const box=b.querySelector('#crun');
  const step=t=>{const el=document.createElement('div');el.className='step';el.innerHTML=`<span class="d"><span class="spin"></span></span><span>${esc(t)}</span>`;box.appendChild(el);return el};
@@ -1264,7 +1276,7 @@ addEventListener('appinstalled',()=>{DEFERRED=null;try{nav()}catch(e){}toast('�
 async function installApp(){
  if(DEFERRED){DEFERRED.prompt();try{await DEFERRED.userChoice}catch(e){}DEFERRED=null;return}
  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
- showModal(`<div style="text-align:center"><div class="big">📲</div><h3>${tr('Install Gamify Agent','ثبّت Gamify Agent')}</h3></div><p>${ios?tr('Tap the Share button, then "Add to Home Screen".','اضغط زر المشاركة ثم «إضافة إلى الشاشة الرئيسية».'):tr('Open the browser menu (⋮), then "Install app" or "Add to Home screen".','افتح قائمة المتصفح (⋮) ثم «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».')}</p><div class="row" style="justify-content:center"><button class="btn" onclick="closeModal()">OK</button></div>`)}
+ showModal(`<div style="text-align:center"><div class="big">📲</div><h3>${tr('Install HOG Gamify Anything','ثبّت HOG Gamify Anything')}</h3></div><p>${ios?tr('Tap the Share button, then "Add to Home Screen".','اضغط زر المشاركة ثم «إضافة إلى الشاشة الرئيسية».'):tr('Open the browser menu (⋮), then "Install app" or "Add to Home screen".','افتح قائمة المتصفح (⋮) ثم «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».')}</p><div class="row" style="justify-content:center"><button class="btn" onclick="closeModal()">OK</button></div>`)}
 if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 
 
@@ -1284,7 +1296,7 @@ addEventListener('popstate',()=>{
 /* ============ v9: Supabase auth + cloud sync + server-side AI ============ */
 (function(){
  const C=(window.GA_CFG||{});if(C.SUPABASE_URL&&C.SUPABASE_ANON_KEY)SB.cfg={url:C.SUPABASE_URL.replace(/\/+$/,''),key:C.SUPABASE_ANON_KEY};
- const SYNC=k=>/^ga_(board|cards|custom|genius|gth|stats|theme|seen_.+)$/.test(k);
+ const SYNC=k=>/^ga_(board|cards|custom|genius|gth|stats|theme|puz|seen_.+)$/.test(k);
  const S0=store;
  const raw=(k,v)=>{try{if(v===undefined){const r=localStorage.getItem(k);return r?JSON.parse(r):null}localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}};
  let dirty=new Set(),timer=0;
@@ -1326,7 +1338,7 @@ addEventListener('popstate',()=>{
   stage(`<div class="card" style="margin-top:24px;text-align:center"><div class="big">🎮</div><h3>${m==='in'?tr('Sign in','تسجيل الدخول'):tr('Create your account','إنشاء حساب')}</h3>
   <p class="mut">${tr('Your games, points and settings sync across devices.','ألعابك ونقاطك وإعداداتك تتزامن بين أجهزتك.')}</p>
   <input id="ae" type="email" dir="ltr" autocomplete="email" placeholder="email@example.com" style="margin-top:8px">
-  <input id="ap1" type="password" dir="ltr" autocomplete="${m==='in'?'current-password':'new-password'}" placeholder="${tr('Password (6+ characters)','كلمة المرور (٦ أحرف فأكثر)')}" style="margin-top:8px" onkeydown="if(event.key==='Enter')authGo()">
+  <div style="position:relative;margin-top:8px"><input id="ap1" type="password" dir="ltr" autocomplete="${m==='in'?'current-password':'new-password'}" placeholder="${tr('Password (6+ characters)','كلمة المرور (٦ أحرف فأكثر)')}" style="width:100%;padding-inline-end:46px" onkeydown="if(event.key==='Enter')authGo()"><button type="button" id="peye" aria-label="show password" title="${tr('Show / hide password','إظهار / إخفاء كلمة المرور')}" onclick="const i=$('#ap1'),s=i.type==='password';i.type=s?'text':'password';this.textContent=s?'🙈':'👁'" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:transparent;border:0;font-size:20px;padding:6px;cursor:pointer">👁</button></div>
   <div id="amsg" class="mut" style="min-height:20px;margin-top:6px"></div>
   <div class="row" style="justify-content:center"><button class="btn" id="abtn" onclick="authGo()">${m==='in'?tr('Sign in','دخول'):tr('Sign up','تسجيل')}</button></div>
   <div class="row" style="justify-content:center;margin-top:8px"><button class="btn alt sm" onclick="authMode='${m==='in'?'up':'in'}';authView()">${m==='in'?tr('New here? Create account','جديد؟ أنشئ حسابًا'):tr('Have an account? Sign in','لديك حساب؟ سجّل الدخول')}</button>${m==='in'?`<button class="btn alt sm" onclick="authReset()">${tr('Forgot password','نسيت كلمة المرور')}</button>`:''}</div>
@@ -1396,7 +1408,7 @@ async function stageCall(stage,content){
  return llmRaw(st.sys+'\n\n'+content,st.max)}
 function parseJ(t){const a=t.search(/[\[{]/);if(a<0)throw new Error('no JSON');const o=t[a],c=o==='['?']':'}';return JSON.parse(t.slice(a,t.lastIndexOf(c)+1))}
 function parseGame(t){const m=t.match(/<game>([\s\S]*?)(<\/game>|$)/i);let h=m?m[1].trim():'';if(!h){const d=t.search(/<!doctype html|<html/i);if(d>=0)h=t.slice(d).replace(/```\s*$/,'').trim()}
- h=h.replace(/^```(html)?\s*/i,'').replace(/```\s*$/,'');const s=t.match(/<summary>([\s\S]*?)<\/summary>/i);return {html:h,summary:s?s[1].trim():''}}
+ h=h.replace(/^```(html)?\s*/i,'').replace(/```\s*$/,'');const s=t.match(/<summary>([\s\S]*?)<\/summary>/i);let data=null;try{const dm=t.match(/<data>([\s\S]*?)(<\/data>|$)/i);if(dm)data=JSON.parse(dm[1].trim())}catch(e){}return {html:h,summary:s?s[1].trim():'',data}}
 function probeDoc(html,token){
  const probe='<script>'+`(function(){var E=[];addEventListener('error',function(e){E.push(String(e.message||'error').slice(0,160))});addEventListener('unhandledrejection',function(e){E.push('promise: '+String(e.reason).slice(0,120))});var oe=console.error;console.error=function(){E.push('console: '+[].slice.call(arguments).join(' ').slice(0,120));try{oe.apply(console,arguments)}catch(x){}};
 function snap(){var b=document.body;return b?(b.innerText||'').length+':'+b.innerHTML.length:'0'}
@@ -1419,9 +1431,9 @@ const MP=document.createElement('style');MP.textContent=`.mis{margin-top:4px}.mr
 .mlog{font-size:12px;color:var(--mut);margin-top:6px;max-height:110px;overflow:auto}.mscore{font-size:34px;font-weight:800}.cbtn.rec{background:#e11d48;color:#fff;animation:pls 1s infinite}.cbtn.on{background:var(--acc);color:#04202a}
 #ov{position:fixed;inset:0;z-index:90;background:#000;display:none;flex-direction:column}#ov.on{display:flex}#ov .ovb{display:flex;gap:8px;padding:8px;background:var(--card)}#ov iframe{flex:1;border:0;width:100%;background:#fff}`;document.head.appendChild(MP);
 const ov=document.createElement('div');ov.id='ov';document.body.appendChild(ov);
-function openGame(){if(!MISSION||!MISSION.html)return;ov.innerHTML=`<div class="ovb"><button class="btn sm" onclick="closeOv()">← ${tr('Back to chat','عودة للمحادثة')}</button><span class="sp" style="flex:1"></span><button class="btn alt sm" onclick="dlGame()">⬇ ${tr('Download','تحميل')}</button></div><iframe sandbox="allow-scripts allow-pointer-lock" title="game"></iframe>`;ov.querySelector('iframe').srcdoc=MISSION.html;ov.classList.add('on');OVOPEN=true;try{history.pushState({ga:1},'')}catch(e){}}
+function openGame(){if(!MISSION||!MISSION.html)return;ov.innerHTML=`<div class="ovb"><button class="btn sm" onclick="closeOv()">← ${tr('Back to chat','عودة للمحادثة')}</button><span class="sp" style="flex:1"></span><button class="btn alt sm" onclick="dlGame()">⬇ ${tr('Download','تحميل')}</button></div><iframe sandbox="allow-scripts allow-pointer-lock" title="game"></iframe>`;ov.querySelector('iframe').srcdoc=withBadge(MISSION.html);ov.classList.add('on');OVOPEN=true;try{history.pushState({ga:1},'')}catch(e){}}
 function closeOv(){ov.classList.remove('on');ov.innerHTML='';OVOPEN=false}
-function dlGame(){if(!MISSION)return;const b=new Blob([MISSION.html],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(MISSION.title||'game').replace(/[^\w؀-ۿ-]+/g,'_')+'.html';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+function dlGame(){if(!MISSION)return;const b=new Blob([withBadge(MISSION.html)],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(MISSION.title||'game').replace(/[^\w؀-ۿ-]+/g,'_')+'.html';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
 const RUBRIC={understanding:15,planning:10,completeness:20,functionality:20,ux:10,fixes:15,mobile:10};
 async function runMission(task,prev){
  if(!llmReady()){return agentMsg(`${tr('Building real games needs your own Claude API key (Creator plan).','بناء ألعاب حقيقية يحتاج مفتاح Claude API الخاص بك (باقة المبدع).')}<div class="row" style="margin-top:8px"><button class="btn sm" onclick="aiSettings()">🔑 ${tr('Add my API key','أضف مفتاحي')}</button></div>`)}
@@ -1436,13 +1448,15 @@ async function runMission(task,prev){
   set(0,'run');log(tr('Understanding your request…','أفهم طلبك…'));let plan;
   try{plan=parseJ(await stageCall('think','USER REQUEST:\n'+task))}catch(e){throw new Error('THINK: '+e.message)}
   M0.title=plan.title||'game';set(0,'ok');log('📋 '+(plan.title||'')+' — '+(plan.type||''));
+  let bank=[];if(can('bankSearch')){try{bank=bankPick(task,plan,24)}catch(e){}}
+  if(bank.length)log('📚 '+tr('Found '+bank.length+' items in the question bank','وجدت '+bank.length+' عنصرًا في بنك الأسئلة'));
   let html='',fb='',tests,rev,rounds=0,MAXFIX=2;
   if(prev){html=prev.html;fb=prev.fb}
   for(;;){
    set(1,'run');log(rounds?tr('Fixing the problems…','أصلح المشكلات…'):tr('Writing the game…','أكتب اللعبة…'));
-   const inp='TASK:\n'+task+'\n\nPLAN:\n'+JSON.stringify(plan)+(fb?'\n\nFEEDBACK TO FIX:\n'+fb+'\n\nPREVIOUS HTML:\n'+html:'');
+   const inp='TASK:\n'+task+'\n\nPLAN:\n'+JSON.stringify(plan)+(bank.length?'\n\nQUESTION BANK (use these exact questions and answers in the game; add extra ones only if fewer than 10):\n'+JSON.stringify(bank):'')+'\n\nAfter </game> also output <data>[{"q":"...","options":["..."],"answer":"correct answer text"}]</data> listing every question or puzzle used.'+(fb?'\n\nFEEDBACK TO FIX:\n'+fb+'\n\nPREVIOUS HTML:\n'+html:'');
    const g=parseGame(await stageCall('build',inp));if(!/<html|<body|<script/i.test(g.html))throw new Error('BUILD: '+tr('no game was produced','لم تُنتج لعبة'));
-   html=g.html;set(1,'ok');log('✅ '+(g.summary||tr('Game written','تمت كتابة اللعبة')));
+   html=g.html;M0.data=(g.data&&g.data.length)?g.data:bank;set(1,'ok');log('✅ '+(g.summary||tr('Game written','تمت كتابة اللعبة')));
    set(2,'run');log(tr('Running the game in a sandbox and clicking every button…','أشغّل اللعبة في بيئة معزولة وأضغط كل زر…'));
    tests=await runTests(html);const tv=testVerdict(tests);tests.verdict=tv;
    log((tv.pass?'🟢 ':'🔴 ')+(tv.pass?tr('Automated tests passed','نجحت الاختبارات الآلية'):tv.fails.join('; ').slice(0,160))+(tv.warns.length?' · ⚠ '+tv.warns.join(', '):''));
@@ -1461,7 +1475,7 @@ async function runMission(task,prev){
   const mres=b.querySelector('#mres');
   mres.innerHTML=`<div class="card" style="margin-top:10px;text-align:center"><div class="mscore">${approved?'✅':'⛔'} ${total}/100</div><b>${esc(grade)}</b><p class="mut" style="text-align:start">${esc(jr.report||'')}</p>
    <div class="row" style="justify-content:center">${approved?`<button class="btn" onclick="openGame()">▶ ${tr('Play the game','العب اللعبة')}</button><button class="btn alt" onclick="dlGame()">⬇ ${tr('Download','تحميل')}</button>`:`<button class="btn" onclick="runMission(MISSION.task,{html:MISSION.html,fb:'Judge rejected: '+${JSON.stringify((jr.report||'').slice(0,400))}})">🔁 ${tr('Try again','حاول مجددًا')}</button><button class="btn alt" onclick="openGame()">${tr('Open anyway (not approved)','افتحها رغم ذلك (غير معتمدة)')}</button>`}</div></div>`;
-  mres.scrollIntoView({block:'end',behavior:'smooth'});
+  mres.insertAdjacentHTML('beforeend',exportRow());mres.scrollIntoView({block:'end',behavior:'smooth'});
   voiceSay(approved?tr('Your game is ready and approved with score '+total+'. Tap play.','لعبتك جاهزة ومعتمدة بدرجة '+total+'. اضغط العب.'):tr('The game was not approved. Score '+total+'.','لم تُعتمد اللعبة. الدرجة '+total+'.'));
  }catch(e){stop(e.message)}}
 RX.mk=/(create|make|build|design|code|اصنع|اعمل|أنشئ|انشئ|صمم|صمّم|ابني|ابن|برمج).{0,40}(game|لعبة|لعبه|العاب|ألعاب)|(game|لعبة|لعبه).{0,12}(about|for|عن|ل)/i;
@@ -1469,6 +1483,96 @@ RX.mk=/(create|make|build|design|code|اصنع|اعمل|أنشئ|انشئ|صمم
 function missionGo(){const ta=$('#cin');const t=ta?ta.value.trim():'';if(!t)return toast('🧠 '+tr('Type or say what game you want, then tap 🧠','اكتب أو قل اللعبة التي تريدها ثم اضغط 🧠'),3000);ta.value='';chatGrow(ta);userMsg(t.length>400?t.slice(0,400)+'…':t);runMission(t)}
 try{VOICE.on=!!store('ga_voice')}catch(e){}
 setTimeout(voiceBtns,0);
+
+
+/* ============ v11: puzzle bank, question-bank search, exports, free badge ============ */
+const H3=(a,b,c)=>[a,b,c].map(x=>({en:x[0],ar:x[1]}));
+const PZ=[
+{id:'p1',t:'riddle',d:1,q:{en:'What has keys but cannot open any lock?',ar:'ما الشيء الذي له مفاتيح لكنه لا يفتح أي قفل؟'},h:H3(['You use it every day to write.','تستخدمه كل يوم للكتابة.'],['It can be on a computer or make music.','قد يكون في الحاسوب أو يصنع الموسيقى.'],['Press its keys to type.','تضغط مفاتيحه لتكتب.']),a:['keyboard','piano','لوحة المفاتيح','كيبورد','البيانو','بيانو']},
+{id:'p2',t:'riddle',d:1,q:{en:'What gets wetter the more it dries?',ar:'ما الشيء الذي يزداد بللًا كلما جفّف؟'},h:H3(['You find it in the bathroom.','تجده في الحمام.'],['You use it after a shower.','تستعمله بعد الاستحمام.'],['It is made of cloth.','مصنوعة من القماش.']),a:['towel','a towel','منشفة','فوطة','المنشفة']},
+{id:'p3',t:'riddle',d:2,q:{en:'I speak without a mouth and hear without ears. What am I?',ar:'أتكلم بلا فم وأسمع بلا أذن، فمن أنا؟'},h:H3(['You can hear me in mountains and empty halls.','تسمعني في الجبال والقاعات الفارغة.'],['I repeat what you say.','أكرر ما تقوله.'],['Shout in a cave and I answer.','اصرخ في كهف فأجيبك.']),a:['echo','an echo','صدى','الصدى']},
+{id:'p4',t:'riddle',d:1,q:{en:'What has hands but cannot clap?',ar:'ما الشيء الذي له يدان لكنه لا يصفّق؟'},h:H3(['It hangs on the wall.','يُعلّق على الحائط.'],['It tells you something important.','يخبرك بشيء مهم.'],['Tick, tock!','تك، تك!']),a:['clock','a clock','watch','ساعة','الساعة']},
+{id:'p5',t:'riddle',d:2,q:{en:'The more you take, the more you leave behind. What are they?',ar:'كلما أخذتَ منها أكثر، تركتَ خلفك أكثر. ما هي؟'},h:H3(['You make them when you walk.','تصنعها عندما تمشي.'],['Look at the sand or the snow.','انظر إلى الرمل أو الثلج.'],['They are marks of your feet.','هي آثار قدميك.']),a:['footsteps','steps','footprints','خطوات','الخطوات','آثار الأقدام']},
+{id:'p6',t:'riddle',d:3,q:{en:'What can travel around the world while staying in a corner?',ar:'ما الشيء الذي يجوب العالم وهو باقٍ في ركنه؟'},h:H3(['It sits in the corner of an envelope.','يجلس في زاوية المظروف.'],['It helps letters travel.','يساعد الرسائل على السفر.'],['You stick it with glue.','تلصقه بالصمغ.']),a:['stamp','a stamp','طابع','طابع بريد','الطابع']},
+{id:'p7',t:'riddle',d:2,q:{en:'What has a head and a tail but no body?',ar:'ما الشيء الذي له رأس وذيل وليس له جسد؟'},h:H3(['You can flip it to decide.','تقلبها لتقرّر.'],['It is in your pocket or wallet.','في جيبك أو محفظتك.'],['Heads or tails!','صورة أو كتابة!']),a:['coin','a coin','عملة','عملة معدنية','قطعة نقود','نقود']},
+{id:'p8',t:'riddle',d:1,q:{en:'What has teeth but cannot bite?',ar:'ما الشيء الذي له أسنان لكنه لا يعضّ؟'},h:H3(['You use it on your hair.','تستخدمه على شعرك.'],['It is in every bathroom.','في كل حمام.'],['You use it to tidy your hair.','ترتّب به شعرك.']),a:['comb','a comb','مشط','المشط']},
+{id:'p9',t:'riddle',d:2,q:{en:'What goes up but never comes down?',ar:'ما الشيء الذي يصعد ولا ينزل أبدًا؟'},h:H3(['Everyone has it.','كل إنسان لديه.'],['It grows each birthday.','يزيد كل عيد ميلاد.'],['Candles show it on a cake.','تعرضه شموع الكعكة.']),a:['age','your age','العمر','السن','عمرك']},
+{id:'p10',t:'riddle',d:2,q:{en:'What has an eye but cannot see?',ar:'ما الشيء الذي له عين لكنه لا يرى؟'},h:H3(['Tailors use it.','يستعمله الخياط.'],['You thread something through it.','تُدخل فيه خيطًا.'],['It is sharp and thin.','حادة ورفيعة.']),a:['needle','a needle','إبرة','الإبرة']},
+{id:'p11',t:'riddle',d:2,q:{en:'What can you catch but not throw?',ar:'ما الشيء الذي تلتقطه ولا تستطيع رميه؟'},h:H3(['It is not a ball.','ليس كرة.'],['It makes you sneeze.','يجعلك تعطس.'],['Winter brings it.','يأتي مع الشتاء.']),a:['cold','a cold','زكام','نزلة برد','برد','الزكام']},
+{id:'p12',t:'riddle',d:3,q:{en:'What is full of holes but still holds water?',ar:'ما الشيء المليء بالثقوب ومع ذلك يحتفظ بالماء؟'},h:H3(['You wash with it.','تغسل به.'],['It is soft.','ناعم.'],['It lives in the sea or the kitchen.','يعيش في البحر أو المطبخ.']),a:['sponge','a sponge','اسفنجة','إسفنجة','الإسفنجة','الاسفنج']},
+{id:'p13',t:'riddle',d:3,q:{en:'The more you take away from it, the bigger it gets. What is it?',ar:'كلما أخذتَ منها صارت أكبر. ما هي؟'},h:H3(['You can dig one.','يمكنك أن تحفر واحدة.'],['It is in the ground.','في الأرض.'],['It is empty space.','هي فراغ.']),a:['hole','a hole','حفرة','الحفرة','ثقب']},
+{id:'p14',t:'riddle',d:1,q:{en:'What walks without legs and cries without eyes?',ar:'ما الشيء الذي يمشي بلا أرجل ويبكي بلا عيون؟'},h:H3(['Look up at the sky.','انظر إلى السماء.'],['It brings rain.','يجلب المطر.'],['It is white or grey.','أبيض أو رمادي.']),a:['cloud','a cloud','clouds','سحابة','السحاب','الغيمة','غيمة','السحابة']},
+{id:'p15',t:'riddle',d:1,q:{en:'What writes but cannot read?',ar:'ما الشيء الذي يكتب ولا يقرأ؟'},h:H3(['Students use it.','يستخدمه الطلاب.'],['It needs ink or lead.','يحتاج حبرًا أو رصاصًا.'],['It is in your pencil case.','في مقلمتك.']),a:['pen','pencil','a pen','a pencil','قلم','القلم']},
+{id:'p16',t:'logic',d:2,q:{en:'A farmer has 17 sheep. All but 9 run away. How many are left?',ar:'لدى مزارع 17 خروفًا. هرب كلها عدا 9. كم بقي؟'},h:H3(['Read "all but 9" slowly.','اقرأ «كلها عدا 9» ببطء.'],['The 9 did not run away.','التسعة لم تهرب.'],['It is not 8.','ليس 8.']),a:['9','nine','تسعة','٩']},
+{id:'p17',t:'logic',d:2,q:{en:'How many months of the year have 28 days?',ar:'كم شهرًا في السنة فيه 28 يومًا؟'},h:H3(['Think about the minimum number of days.','فكّر في الحد الأدنى للأيام.'],['February is not the only one.','فبراير ليس الوحيد.'],['Every month has at least 28.','كل شهر فيه 28 على الأقل.']),a:['12','twelve','all','all of them','اثنا عشر','١٢','كلها','كل الشهور']},
+{id:'p18',t:'logic',d:2,q:{en:'You have 3 apples and take away 2. How many apples do you have?',ar:'لديك 3 تفاحات وأخذتَ منها 2. كم تفاحة معك؟'},h:H3(['Who has the ones you took?','من معه التي أخذتها؟'],['"Take away" means you took them.','«أخذت» يعني صارت معك.'],['Not 1.','ليس 1.']),a:['2','two','اثنتان','تفاحتان','٢','2 apples']},
+{id:'p19',t:'math',d:3,q:{en:'A bat and a ball cost 1.10 together. The bat costs 1.00 more than the ball. How many cents is the ball?',ar:'مضرب وكرة ثمنهما معًا 1.10، والمضرب أغلى من الكرة بـ 1.00. كم سنتًا ثمن الكرة؟'},h:H3(['It is not 10.','ليس 10.'],['Let the ball be x, the bat is x + 100.','لتكن الكرة س والمضرب س + 100.'],['2x + 100 = 110.','2س + 100 = 110.']),a:['5','5 cents','0.05','five','٥','5 سنت','خمسة']},
+{id:'p20',t:'logic',d:1,q:{en:'Which weighs more: a kilo of feathers or a kilo of iron?',ar:'أيهما أثقل: كيلو ريش أم كيلو حديد؟'},h:H3(['Read the question again.','أعد قراءة السؤال.'],['Both are a kilo.','كلاهما كيلو.'],['The answer is not feathers or iron.','الإجابة ليست الريش ولا الحديد.']),a:['same','equal','they weigh the same','نفس الوزن','متساويان','الاثنان متساويان','لا فرق','سواء']},
+{id:'p21',t:'math',d:1,q:{en:'What comes next? 2, 4, 8, 16, ?',ar:'ما العدد التالي؟ 2، 4، 8، 16، ؟'},h:H3(['Each number is doubled.','كل عدد يتضاعف.'],['16 × 2.','16 × 2.'],['It is between 30 and 35.','بين 30 و 35.']),a:['32','٣٢','thirty two','thirty-two']},
+{id:'p22',t:'math',d:2,q:{en:'What comes next? 1, 1, 2, 3, 5, 8, ?',ar:'ما العدد التالي؟ 1، 1، 2، 3، 5، 8، ؟'},h:H3(['Add the last two numbers.','اجمع آخر عددين.'],['5 + 8.','5 + 8.'],['It is a famous sequence named after Fibonacci.','متتالية مشهورة تُنسب إلى فيبوناتشي.']),a:['13','١٣','thirteen']},
+{id:'p23',t:'math',d:2,q:{en:'I am a two-digit even number less than 20. My digits add up to 5. Who am I?',ar:'أنا عدد زوجي من رقمين أقل من 20، ومجموع رقميّ 5. فمن أنا؟'},h:H3(['I start with 1.','أبدأ بالرقم 1.'],['My second digit is 4.','رقمي الثاني 4.'],['10 + 4.','10 + 4.']),a:['14','١٤','fourteen']},
+{id:'p24',t:'math',d:2,q:{en:'I think of a number, multiply it by 3 and add 4. I get 19. What is the number?',ar:'فكّرت في عدد وضربته في 3 ثم أضفت 4 فصار 19. ما العدد؟'},h:H3(['Work backwards.','اعمل بالعكس.'],['19 − 4 = 15.','19 − 4 = 15.'],['Now divide 15 by 3.','اقسم 15 على 3.']),a:['5','five','٥','خمسة']},
+{id:'p25',t:'logic',d:3,q:{en:'If 5 machines make 5 items in 5 minutes, how many minutes do 100 machines need to make 100 items?',ar:'إذا صنعت 5 آلات 5 قطع في 5 دقائق، فكم دقيقة تحتاج 100 آلة لصنع 100 قطعة؟'},h:H3(['How long does one machine need for one item?','كم تحتاج آلة واحدة لقطعة واحدة؟'],['One machine makes one item in 5 minutes.','الآلة الواحدة تصنع قطعة في 5 دقائق.'],['Everyone works at the same time.','كلها تعمل في الوقت نفسه.']),a:['5','five','5 minutes','٥','خمس دقائق','5 دقائق']}
+];
+const PZT={riddle:{i:'🧩',en:'Riddles',ar:'ألغاز'},logic:{i:'🧠',en:'Logic',ar:'منطق'},math:{i:'🔢',en:'Number puzzles',ar:'ألغاز أرقام'},word:{i:'🔤',en:'Word puzzles',ar:'ألغاز كلمات'}};
+const allPZ=()=>PZ.concat(store('ga_puz')||[]);
+const pzNorm=s=>String(s).toLowerCase().replace(/[ً-ْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/[^\p{L}\p{N}\s.]/gu,'').replace(/\s+/g,' ').trim();
+const pzOk=(p,s)=>{const x=pzNorm(s);if(!x)return false;return p.a.some(a=>{const y=pzNorm(a);return x===y||(y.length>3&&x.includes(y))||(x.length>3&&y.includes(x))})};
+let PZS={f:'all',h:{}};
+function puzzlesView(){TAB='puzzles';nav();clearTimer();if(!can('puzzles'))return stage(lockCard('puzzles'));
+ const all=allPZ(),list=all.filter(p=>PZS.f==='all'||p.t===PZS.f);
+ stage(`<div class="card"><h3>🧩 ${tr('Puzzle Bank','بنك الألغاز')} <span class="tag p">${all.length}</span></h3><p class="mut">${tr('Riddles, logic and number puzzles with 3 hints each. Tap a puzzle to play it, or let the agent design a new one.','ألغاز وأحاجي منطق وأرقام لكل منها ثلاثة تلميحات. اضغط لغزًا لتحلّه، أو دع الوكيل يصمّم لغزًا جديدًا.')}</p>
+ <div class="row" style="flex-wrap:wrap"><button class="btn ${PZS.f==='all'?'':'alt'} sm" onclick="PZS.f='all';puzzlesView()">${tr('All','الكل')}</button>${Object.keys(PZT).map(k=>`<button class="btn ${PZS.f===k?'':'alt'} sm" onclick="PZS.f='${k}';puzzlesView()">${PZT[k].i} ${esc(L(PZT[k]))}</button>`).join('')}<span class="sp"></span><button class="btn sm" onclick="pzDesign()">🤖 ${tr('Design a puzzle','صمّم لغزًا')}</button></div></div>`
+ +list.map(p=>`<button class="card" style="width:100%;text-align:start;cursor:pointer" onclick="pzOpen('${p.id}')"><div class="row"><span style="font-size:22px">${PZT[p.t]?PZT[p.t].i:'🧩'}</span><span style="flex:1">${esc(L(p.q))}</span><span class="mut">${'⭐'.repeat(p.d||1)}</span></div></button>`).join(''))}
+function pzFind(id){return allPZ().find(p=>p.id===id)}
+function pzOpen(id){const p=pzFind(id);if(!p)return;PZS.h[id]=PZS.h[id]||0;
+ const hs=(p.h||[]).slice(0,PZS.h[id]).map((h,i)=>`<div class="mut">💡 ${i+1}. ${esc(L(h))}</div>`).join('');
+ showModal(`<h3>${PZT[p.t]?PZT[p.t].i:'🧩'} ${tr('Puzzle','لغز')} · ${'⭐'.repeat(p.d||1)}</h3><p style="font-size:17px">${esc(L(p.q))}</p>${hs}<div id="pzres" style="min-height:22px"></div>
+ <input id="pza" placeholder="${tr('Your answer','إجابتك')}" onkeydown="if(event.key==='Enter')pzCheck('${id}')">
+ <div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="btn" onclick="pzCheck('${id}')">✅ ${tr('Check','تحقق')}</button><button class="btn alt" onclick="pzHint('${id}')">💡 ${tr('Hint','تلميح')} (${PZS.h[id]}/${(p.h||[]).length})</button><button class="btn alt" onclick="pzReveal('${id}')">👁 ${tr('Answer','الإجابة')}</button><button class="btn alt sm" onclick="closeModal()">✕</button></div>`)}
+function pzHint(id){const p=pzFind(id);if(PZS.h[id]<(p.h||[]).length)PZS.h[id]++;pzOpen(id)}
+function pzCheck(id){const p=pzFind(id),v=$('#pza').value,r=$('#pzres');if(pzOk(p,v)){beep('ok');r.innerHTML='🎉 <b>'+tr('Correct!','صحيح!')+'</b>'}else{beep('no');r.innerHTML='❌ '+tr('Not yet, try again or use a hint.','ليس بعد، حاول مرة أخرى أو استخدم تلميحًا.')}}
+function pzReveal(id){const p=pzFind(id);$('#pzres').innerHTML='✅ '+tr('Answer: ','الإجابة: ')+'<b>'+esc(p.a[UI==='ar'?Math.max(0,p.a.findIndex(x=>/[؀-ۿ]/.test(x))):0]||p.a[0])+'</b>'}
+function pzDesign(){if(!can('ai'))return showUpgrade('ai');if(!llmReady())return aiSettings();
+ showModal(`<h3>🤖 ${tr('Puzzle designer','مصمم الألغاز')}</h3><label class="l">${tr('Topic or idea','الموضوع أو الفكرة')}</label><input id="pzt" placeholder="${tr('e.g. animals, football, numbers','مثال: حيوانات، كرة قدم، أرقام')}">
+ <label class="l">${tr('Type','النوع')}</label><select id="pzy">${Object.keys(PZT).map(k=>`<option value="${k}">${esc(L(PZT[k]))}</option>`).join('')}</select>
+ <label class="l">${tr('Difficulty','الصعوبة')}</label><select id="pzd"><option value="1">⭐</option><option value="2" selected>⭐⭐</option><option value="3">⭐⭐⭐</option></select>
+ <div class="row" style="margin-top:12px"><button class="btn" id="pzg" onclick="pzMake()">✨ ${tr('Design','صمّم')}</button><button class="btn alt" onclick="closeModal()">✕</button></div><div id="pzmsg" class="mut" style="margin-top:8px"></div>`)}
+async function pzMake(){const t=$('#pzt').value.trim()||'any',ty=$('#pzy').value,d=+$('#pzd').value,m=$('#pzmsg'),b=$('#pzg');b.disabled=true;let why='';
+ try{for(let i=0;i<2;i++){m.textContent='⏳ '+(i?tr('Improving…','أحسّنه…'):tr('Designing…','أصمّم…'));
+  const g=await llmJSON(`Design ONE ${ty} puzzle (difficulty ${d}/3, kid-friendly, no religious or political content) about: ${t}. ${why?'The previous attempt failed because: '+why+'. ':''}It must have exactly ONE correct answer that a player can type in one or two words. Reply ONLY with JSON: {"q_en":str,"q_ar":str,"hints_en":[str,str,str],"hints_ar":[str,str,str],"answers":[accepted answers in both English and Arabic, lowercase, 2-6 items]}`,900);
+  m.textContent='⚖️ '+tr('Judge is checking…','الحَكَم يتحقق…');
+  const j=await llmJSON(`You are a strict puzzle judge. Check this puzzle: ${JSON.stringify(g)}. Is it solvable, unambiguous, with exactly one correct answer, and are the 3 hints progressive without giving it away? Reply ONLY JSON: {"ok":bool,"reason":str}`,300);
+  if(j.ok){const p={id:'u'+Date.now(),t:ty,d,q:{en:g.q_en,ar:g.q_ar},h:H3(...[0,1,2].map(k=>[g.hints_en[k]||'',g.hints_ar[k]||''])),a:g.answers.map(String)};const a=store('ga_puz')||[];a.push(p);store('ga_puz',a);closeModal();toast('🧩 '+tr('Puzzle added to your bank','أُضيف اللغز إلى بنكك'));return puzzlesView()}
+  why=j.reason||'unclear'}
+  m.textContent='⚠️ '+tr('The judge rejected two attempts. Try another idea.','رفض الحَكَم محاولتين. جرّب فكرة أخرى.')}catch(e){m.textContent='⚠️ '+e.message}b.disabled=false}
+/* ---- question-bank search for the mission ---- */
+const STOP=new Set(['game','games','make','create','build','for','the','with','kids','children','about','that','this','and','لعبة','العاب','ألعاب','اصنع','اعمل','أنشئ','انشئ','صمم','للأطفال','عن','مع','من','في']);
+function bankPick(text,plan,n){
+ const t=(text+' '+(plan&&plan.title||'')+' '+(plan&&plan.type||'')).toLowerCase();let tp=[];
+ if(RX.quran.test(t))tp.push('quran');if(RX.sports.test(t))tp.push('sports');if(RX.edu.test(t)||/math|science|english|arabic|history|geograph|رياضيات|علوم|لغة|انجليزي|عربي|تاريخ|جغراف/.test(t))tp.push('edu');
+ const ar=/[؀-ۿ]/.test(text),Lg=ar?'ar':'en';const tok=[...new Set(t.match(/[\p{L}\p{N}]{3,}/gu)||[])].filter(w=>!STOP.has(w));
+ const pool=[];(tp.length?tp:['edu','quran','sports']).forEach(k=>QS[k].forEach(q=>pool.push(q)));
+ const sc=q=>{const s=((q.q.en||'')+' '+(q.q.ar||'')+' '+(q.o?(q.o.en||[]).join(' ')+' '+(q.o.ar||[]).join(' '):'')+' '+(q.cat||'')).toLowerCase();let c=0;tok.forEach(w=>{if(s.includes(w))c++});return c};
+ let pick=pool.map(q=>({q,s:sc(q)})).filter(a=>a.s>0).sort((a,b)=>b.s-a.s).map(a=>a.q).slice(0,n);
+ if(pick.length<n&&tp.length){const rest=pool.filter(q=>!pick.includes(q)).sort(()=>Math.random()-.5);pick=pick.concat(rest.slice(0,n-pick.length))}
+ const out=pick.map(q=>q.type==='mc'?{q:q.q[Lg]||q.q.en,options:q.o[Lg]||q.o.en,answer:(q.o[Lg]||q.o.en)[q.a]}:{q:q.q[Lg]||q.q.en,answer:((q.acc&&(q.acc[Lg]||q.acc.en))||[])[0]||''}).filter(x=>x.answer);
+ if(/puzzle|riddle|لغز|ألغاز|الغاز|أحاج/i.test(t)&&can('puzzles'))allPZ().sort(()=>Math.random()-.5).slice(0,10).forEach(p=>out.push({q:L2(p.q,Lg),answer:p.a[Lg==='ar'?Math.max(0,p.a.findIndex(x=>/[؀-ۿ]/.test(x))):0]||p.a[0],hints:(p.h||[]).map(h=>L2(h,Lg))}));
+ return out}
+const L2=(o,l)=>o?(o[l]||o.en||o.ar||''):'';
+/* ---- free-plan badge + exports ---- */
+const BADGE='<div style="position:fixed;bottom:6px;left:50%;transform:translateX(-50%);z-index:2147483000;background:rgba(0,0,0,.65);color:#fff;font:600 11px sans-serif;padding:4px 12px;border-radius:99px;pointer-events:none;white-space:nowrap">Made with HOG Gamify Anything</div>';
+const needBadge=()=>!can('nobadge');
+function withBadge(h){if(!needBadge())return h;return /<\/body>/i.test(h)?h.replace(/<\/body>/i,BADGE+'</body>'):h+BADGE}
+function exportRow(){const d=MISSION&&MISSION.data;if(!d||!d.length)return '';const g=can('export_basic');
+ return `<div class="row" style="margin-top:8px;justify-content:center;flex-wrap:wrap"><span class="mut">${g?'':'🔒 '}${tr('Export questions:','تصدير الأسئلة:')}</span><button class="btn alt sm" onclick="expData('pdf')">📄 PDF</button><button class="btn alt sm" onclick="expData('csv')">📊 CSV</button><button class="btn alt sm" onclick="expData('json')">{ } JSON</button></div>`}
+function expSave(name,mime,body){const b=new Blob([body],{type:mime});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},600)}
+function expData(fmt){if(!can('export_basic'))return showUpgrade('export_basic');const d=(MISSION&&MISSION.data)||[];if(!d.length)return toast(tr('No questions to export','لا أسئلة للتصدير'));
+ const name=(MISSION.title||'game').replace(/[^\w؀-ۿ-]+/g,'_');
+ if(fmt==='json')return expSave(name+'.json','application/json',JSON.stringify({title:MISSION.title,questions:d},null,1));
+ if(fmt==='csv'){const q=s=>'"'+String(s==null?'':s).replace(/"/g,'""')+'"';return expSave(name+'.csv','text/csv;charset=utf-8','﻿'+['question,option1,option2,option3,option4,answer'].concat(d.map(x=>[x.q].concat([0,1,2,3].map(i=>(x.options||[])[i]||'')).concat([x.answer]).map(q).join(','))).join('\n'))}
+ const rtl=/[؀-ۿ]/.test(d[0].q);const body=`<!DOCTYPE html><html dir="${rtl?'rtl':'ltr'}"><head><meta charset="utf-8"><title>${esc(MISSION.title||'')}</title><style>body{font-family:Arial,sans-serif;padding:24px}h1{font-size:22px}li{margin:10px 0}.k{page-break-before:always}small{color:#666}</style></head><body><h1>${esc(MISSION.title||'')}</h1><ol>${d.map(x=>`<li>${esc(x.q)}${(x.options||[]).length?'<br>'+x.options.map((o,i)=>'<small>'+String.fromCharCode(65+i)+') '+esc(o)+'</small>').join(' &nbsp; '):'<br><small>____________</small>'}</li>`).join('')}</ol><div class="k"><h1>${rtl?'مفتاح الإجابة':'Answer key'}</h1><ol>${d.map(x=>`<li>${esc(x.answer)}</li>`).join('')}</ol></div>${needBadge()?'<p><small>Made with HOG Gamify Anything</small></p>':''}</body></html>`;
+ const f=document.createElement('iframe');f.style.cssText='position:fixed;left:-9999px;width:800px;height:600px;border:0';f.onload=()=>{try{f.contentWindow.focus();f.contentWindow.print()}catch(e){expSave(name+'.html','text/html',body)}setTimeout(()=>f.remove(),60000)};f.srcdoc=body;document.body.appendChild(f);toast('📄 '+tr('Choose "Save as PDF" in the print window','اختر «حفظ بصيغة PDF» من نافذة الطباعة'),4000)}
 
 /* ============ boot ============ */
 setUI(/^ar/i.test(navigator.language||'')?'ar':'en');setTheme(store('ga_theme')||'dark');aiPill();
