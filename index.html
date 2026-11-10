@@ -209,13 +209,13 @@ tr:hover td{background:var(--soft)}
   <button class="pill" id="menubtn" style="display:none" onclick="toggleSide()" aria-label="menu">☰</button>
   <div class="brand"><div class="logo">🎮</div><span>HOG Gamify Anything</span></div>
   <div class="sp"></div>
-  <button class="pill" id="homebtn" style="display:none" onclick="goHome()">🏠</button><button class="pill" id="aibtn" onclick="aiSettings()">🔌 AI ○</button><button class="pill" id="thbtn" onclick="toggleTheme()">🌙</button><button class="pill" id="langbtn" onclick="toggleUI()">العربية</button>
+  <button class="pill" id="homebtn" style="display:none" onclick="goHome()">🏠</button><button class="pill" id="bellbtn" onclick="notesOpen()" aria-label="notifications">🔔</button><button class="pill" id="aibtn" onclick="aiSettings()">🔌 AI ○</button><button class="pill" id="thbtn" onclick="toggleTheme()">🌙</button><button class="pill" id="langbtn" onclick="toggleUI()">العربية</button>
 </div>
 <aside id="side"><div class="shead"><div class="logo">🎮</div><span style="flex:1">HOG Gamify Anything</span><button class="pill" onclick="toggleSide(false)">✕</button></div><div id="nav"></div><div id="sfoot"></div></aside><div id="scrim" onclick="toggleSide(false)"></div>
 <div id="stage"></div>
 <div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div id="mbody"></div></div>
 <div id="toast"></div>
-<div id="composer"><div class="cwrap"><div id="attrow"></div><div class="cbox"><button class="cbtn" id="pin" title="Attach files / images" aria-label="attach" onclick="document.getElementById('cfile').click()">📎</button><button class="cbtn" id="micbtn" title="Talk" aria-label="talk" onclick="voiceListen()" oncontextmenu="event.preventDefault();voiceChat()">🎙</button><button class="cbtn" id="spkbtn" title="Voice replies" aria-label="voice replies" onclick="voiceToggleSpeak()">🔇</button><button class="cbtn" id="misbtn" title="Mission: build a game" aria-label="mission" onclick="missionGo()">🧠</button><textarea id="cin" rows="1" oninput="chatGrow(this)" onkeydown="chatKey(event)"></textarea><button class="cbtn send" aria-label="send" onclick="chatSend()">➤</button></div></div><input id="cfile" type="file" multiple accept=".pdf,.docx,.txt,.md,.csv,image/*" onchange="chatFiles(this)"></div>
+<div id="composer"><div class="cwrap"><div id="attrow"></div><div class="cbox"><button class="cbtn" id="pin" title="Attach files / images" aria-label="attach" onclick="document.getElementById('cfile').click()">📎</button><button class="cbtn" id="micbtn" title="Talk" aria-label="talk" onclick="voiceListen()" oncontextmenu="event.preventDefault();voiceChat()">🎙</button><button class="cbtn" id="spkbtn" title="Voice replies" aria-label="voice replies" onclick="voiceToggleSpeak()">🔇</button><button class="cbtn" id="enhbtn" title="Enhance my prompt" aria-label="enhance" onclick="enhancePrompt()">✨</button><button class="cbtn" id="misbtn" title="Mission: build a game" aria-label="mission" onclick="missionGo()">🧠</button><textarea id="cin" rows="1" oninput="chatGrow(this)" onkeydown="chatKey(event)"></textarea><button class="cbtn send" aria-label="send" onclick="chatSend()">➤</button></div></div><input id="cfile" type="file" multiple accept=".pdf,.docx,.txt,.md,.csv,image/*" onchange="chatFiles(this)"></div>
 
 <script src="config.js"></script>
 <script>
@@ -1216,7 +1216,7 @@ TY(1,'','ما اسم السورة التي تأتي بعد سورة الفاتح
 let ATT=[];
 function chatVis(on){const c=$('#composer');const show=!!(on&&LOGGED);if(c)c.style.display=show?'block':'none';document.body.classList.toggle('hascomp',show)}
 function chatPh(){const i=$('#cin');if(i)i.placeholder=tr('Type or talk: describe a game…','اكتب للوكيل… ألصق درسًا أو صف لعبتك أو أرفق ملفات')}
-function chatGrow(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,Math.round(innerHeight*.4))+'px'}
+function chatGrow(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,Math.round(innerHeight*.22))+'px'}
 function chatKey(e){if(e.key==='Enter'&&!e.shiftKey&&!matchMedia('(pointer:coarse)').matches){e.preventDefault();chatSend()}}
 function chatFiles(inp){[...inp.files].forEach(f=>{if(ATT.length<8)ATT.push(f)});inp.value='';chatAtt()}
 function chatAtt(){const r=$('#attrow');if(!r)return;r.innerHTML=ATT.map((f,i)=>`<span class="achip">${/^image/.test(f.type)?'🖼️':'📄'} ${esc(f.name.slice(0,22))} <a onclick="ATT.splice(${i},1);chatAtt()">✕</a></span>`).join('')}
@@ -1410,7 +1410,7 @@ function parseJ(t){const a=t.search(/[\[{]/);if(a<0)throw new Error('no JSON');c
 function parseGame(t){const m=t.match(/<game>([\s\S]*?)(<\/game>|$)/i);let h=m?m[1].trim():'';if(!h){const d=t.search(/<!doctype html|<html/i);if(d>=0)h=t.slice(d).replace(/```\s*$/,'').trim()}
  h=h.replace(/^```(html)?\s*/i,'').replace(/```\s*$/,'');const s=t.match(/<summary>([\s\S]*?)<\/summary>/i);let data=null;try{const dm=t.match(/<data>([\s\S]*?)(<\/data>|$)/i);if(dm)data=JSON.parse(dm[1].trim())}catch(e){}return {html:h,summary:s?s[1].trim():'',data}}
 function probeDoc(html,token){
- const probe='<script>'+`(function(){var E=[];addEventListener('error',function(e){E.push(String(e.message||'error').slice(0,160))});addEventListener('unhandledrejection',function(e){E.push('promise: '+String(e.reason).slice(0,120))});var oe=console.error;console.error=function(){E.push('console: '+[].slice.call(arguments).join(' ').slice(0,120));try{oe.apply(console,arguments)}catch(x){}};
+ const probe='<script>'+`(function(){var E=[];addEventListener('error',function(e){E.push(String(e.message||'error').slice(0,160))});addEventListener('error',function(e){var t=e.target;if(t&&t!==window&&(t.src||t.href))E.push('resource failed: '+String(t.src||t.href).slice(0,80))},true);window.alert=function(){E.push('alert() blocks touch screens')};window.confirm=function(){E.push('confirm() blocks touch screens');return true};window.prompt=function(){E.push('prompt() blocks touch screens');return ''};addEventListener('unhandledrejection',function(e){E.push('promise: '+String(e.reason).slice(0,120))});var oe=console.error;console.error=function(){E.push('console: '+[].slice.call(arguments).join(' ').slice(0,120));try{oe.apply(console,arguments)}catch(x){}};
 function snap(){var b=document.body;return b?(b.innerText||'').length+':'+b.innerHTML.length:'0'}
 function vis(el){var r=el.getBoundingClientRect(),s=getComputedStyle(el);return r.width>4&&r.height>4&&s.visibility!=='hidden'&&s.display!=='none'}
 addEventListener('load',function(){setTimeout(function(){var res={textLen:(document.body?document.body.innerText:'').length,overflowX:document.documentElement.scrollWidth>innerWidth+4};
@@ -1561,7 +1561,7 @@ function bankPick(text,plan,n){
  return out}
 const L2=(o,l)=>o?(o[l]||o.en||o.ar||''):'';
 /* ---- free-plan badge + exports ---- */
-const BADGE='<div style="position:fixed;bottom:6px;left:50%;transform:translateX(-50%);z-index:2147483000;background:rgba(0,0,0,.65);color:#fff;font:600 11px sans-serif;padding:4px 12px;border-radius:99px;pointer-events:none;white-space:nowrap">Made with HOG Gamify Anything</div>';
+const BADGE='<div style="position:fixed;bottom:6px;left:50%;transform:translateX(-50%);z-index:2147483000;background:rgba(0,0,0,.65);color:#fff;font:600 11px sans-serif;padding:4px 12px;border-radius:99px;pointer-events:none;white-space:nowrap">Made with HOG Gamify Anything · Powered by HOG</div>';
 const needBadge=()=>!can('nobadge');
 function withBadge(h){if(!needBadge())return h;return /<\/body>/i.test(h)?h.replace(/<\/body>/i,BADGE+'</body>'):h+BADGE}
 function exportRow(){const d=MISSION&&MISSION.data;if(!d||!d.length)return '';const g=can('export_basic');
@@ -1582,6 +1582,74 @@ const market0=marketView;marketView=function(){market0();const box=document.crea
 const goHome1=goHome;goHome=function(f){gmStop();return goHome1(f)};const go1=go;go=function(t){gmStop();return go1(t)};
 loadUserCards();
 qbInit();
+
+/* ===== v12: animations, chat polish, enhance, suggestions, notifications ===== */
+(function(){
+const st=document.createElement('style');st.textContent=`
+@keyframes popin{0%{opacity:0;transform:translateY(14px) scale(.96)}60%{transform:translateY(-2px) scale(1.01)}100%{opacity:1;transform:none}}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes bump{50%{transform:scale(.93)}}
+@keyframes ring{0%,100%{transform:rotate(0)}20%{transform:rotate(18deg)}40%{transform:rotate(-16deg)}60%{transform:rotate(10deg)}80%{transform:rotate(-6deg)}}
+@keyframes dots{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-4px)}}
+@keyframes sheen{from{background-position:-200% 0}to{background-position:200% 0}}
+.msg{animation:popin .45s cubic-bezier(.2,.9,.3,1.2) both}
+.msg.me .bub{background:linear-gradient(135deg,#0e7490,#4f46e5);color:#fff;box-shadow:0 4px 14px #4f46e555}
+.msg .bub{border-radius:6px 18px 18px 18px;box-shadow:0 2px 10px #0003}
+.msg .av{box-shadow:0 0 0 2px var(--acc),0 0 14px #22d3ee66}
+.tpl{animation:rise .5s both}.tpl:nth-child(2){animation-delay:.06s}.tpl:nth-child(3){animation-delay:.12s}.tpl:nth-child(4){animation-delay:.18s}.tpl:nth-child(5){animation-delay:.24s}
+.tpl:active,.btn:active,.cbtn:active,.pill:active,.chip:active{animation:bump .25s}
+.card{animation:rise .4s both}
+.btn:not(.alt):not(.sm){background-size:200% 100%}
+.btn:not(.alt):not(.sm):hover{animation:sheen 1.6s linear infinite}
+.typing{display:inline-flex;gap:5px;padding:6px 2px}.typing i{width:8px;height:8px;border-radius:50%;background:var(--acc);animation:dots 1s infinite}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+#bellbtn{position:relative}#bellbtn.new{animation:ring 1s 2}#bellbtn .dot{position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;border-radius:9px;background:#e11d48;color:#fff;font-size:10px;display:grid;place-items:center;padding:0 3px}
+#sugg{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:none}#sugg::-webkit-scrollbar{display:none}
+#sugg button{flex:none;white-space:nowrap;background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:99px;padding:7px 13px;font-size:13px;animation:rise .4s both}
+#sugg button:hover{border-color:var(--acc)}
+#nts{position:fixed;inset:0;z-index:95;background:#000a;display:none;align-items:flex-start;justify-content:center;padding:60px 12px}#nts.on{display:flex}
+#nts .pn{background:var(--card);border:1px solid var(--line);border-radius:18px;width:100%;max-width:460px;max-height:75vh;overflow:auto;padding:14px;animation:popin .35s both;backdrop-filter:blur(14px)}
+.nt{padding:9px 6px;border-bottom:1px solid var(--line);font-size:14px}.nt small{color:var(--mut);display:block}
+.pwr{text-align:center;font-size:11px;color:var(--mut);padding:8px;letter-spacing:.4px}.pwr b{color:var(--acc)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}`;document.head.appendChild(st);
+const st2=document.createElement('style');st2.textContent='.cbox{flex-wrap:wrap}.cbox #cin{flex:1 1 100%;order:-1;max-height:22vh;min-height:40px}.cbox .cbtn{flex:1 1 0}.cbox .cbtn.send{flex:0 0 54px}';document.head.appendChild(st2);
+
+/* ---------- notifications ---------- */
+const NK='ga_notes';const nlist=()=>{try{return JSON.parse(localStorage.getItem(NK)||'[]')}catch(e){return[]}};
+const rw=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}};let unread=+(rw('ga_unread')||0);
+function bellDraw(){const b=$('#bellbtn');if(!b)return;b.innerHTML='🔔'+(unread?`<span class="dot">${unread>9?'9+':unread}</span>`:'')}
+window.notify=function(title,body,kind){const a=nlist();a.unshift({t:Date.now(),title,body:body||''});try{localStorage.setItem(NK,JSON.stringify(a.slice(0,40)))}catch(e){}
+ unread++;rw('ga_unread',unread);bellDraw();const b=$('#bellbtn');if(b){b.classList.remove('new');void b.offsetWidth;b.classList.add('new')}
+ try{beep(kind==='bad'?'no':'win')}catch(e){}try{navigator.vibrate&&navigator.vibrate([120,60,120])}catch(e){}
+ toast('🔔 '+title,3200);
+ try{if(document.hidden&&window.Notification&&Notification.permission==='granted')new Notification(title,{body:body||'',icon:'hog-192.png'})}catch(e){}};
+window.notesOpen=function(){let o=$('#nts');if(!o){o=document.createElement('div');o.id='nts';o.onclick=e=>{if(e.target===o)o.classList.remove('on')};document.body.appendChild(o)}
+ const a=nlist();o.innerHTML=`<div class="pn"><div class="row"><b>🔔 ${tr('Notifications','الإشعارات')}</b><span class="sp"></span>${window.Notification&&Notification.permission==='default'?`<button class="btn alt sm" onclick="Notification.requestPermission().then(()=>notesOpen())">${tr('Allow alerts','اسمح بالتنبيهات')}</button>`:''}<button class="btn alt sm" onclick="localStorage.removeItem('${NK}');notesOpen()">🗑</button></div>
+ ${a.length?a.map(n=>`<div class="nt"><b>${esc(n.title)}</b> ${n.body?esc(n.body):''}<small>${new Date(n.t).toLocaleString()}</small></div>`).join(''):`<p class="mut">${tr('Nothing yet. You will be notified when a game or mission is ready.','لا شيء بعد. سنخبرك عندما تجهز لعبة أو مهمة.')}</p>`}</div>`;
+ o.classList.add('on');unread=0;rw('ga_unread',0);bellDraw()};
+bellDraw();
+/* game / mission ready -> notify (once per game) */
+let lastN=null;new MutationObserver(()=>{const b=document.querySelector('button[onclick="openGame()"]');if(b&&MISSION&&lastN!==MISSION){lastN=MISSION;notify(tr('Your game is ready','لعبتك جاهزة'),MISSION.title||'')}}).observe(document.body,{childList:true,subtree:true});
+
+/* ---------- enhance prompt ---------- */
+window.enhancePrompt=async function(){const ta=$('#cin');const t=ta&&ta.value.trim();if(!t)return toast('✨ '+tr('Type your idea first, then tap ✨','اكتب فكرتك أولًا ثم اضغط ✨'));
+ const b=$('#enhbtn');b.classList.add('on');
+ const fallback=()=>{const ar=/[؀-ۿ]/.test(t);return ar?`${t}\n\nالمطلوب: لعبة منافسة لاعبين اثنين على الموبايل، فيها مستويات سهلة ومتوسطة وصعبة، نقاط وبطاقات مساعدة، أسئلة متنوعة، تصميم جذاب بحركات وأصوات، وشاشة نتيجة وفوز واضحة.`:`${t}\n\nRequirements: a 2-player competition game for mobile, easy/medium/hard levels, points and help cards, varied questions, attractive design with animation and sound, and a clear win/result screen.`};
+ try{let out;if(llmReady()){out=await llmRaw(`Rewrite this request for a game-building agent. Keep the user's language and intent, make it specific and complete (audience, levels, rules, scoring, look). Max 90 words. Return only the rewritten request.\n\n${t}`,400);out=String(out).trim()}else out=fallback();ta.value=out;chatGrow(ta);toast('✨ '+tr('Prompt enhanced','تم تحسين الطلب'))}
+ catch(e){ta.value=fallback();chatGrow(ta);toast('✨ '+tr('Enhanced offline','تم التحسين محليًا'))}finally{b.classList.remove('on')}};
+
+/* ---------- suggestions row ---------- */
+const SUG=[['⚽','لعبة كرة قدم بين فريقين','Football quiz duel'],['📖','مسابقة قرآن للأطفال','Quran kids contest'],['🧮','تحدي جدول الضرب','Times-table battle'],['🔤','لعبة كلمات إنجليزية','English words game'],['🧩','لغز ذاكرة بالصور','Picture memory puzzle'],['🌍','عواصم وأعلام','Capitals and flags'],['🧪','أسئلة علوم للصف الخامس','Grade 5 science quiz']];
+function suggDraw(){let r=$('#sugg');const cb=$('#composer .cwrap');if(!cb)return;if(!r){r=document.createElement('div');r.id='sugg';cb.insertBefore(r,cb.firstChild)}
+ const pool=SUG.slice().sort(()=>Math.random()-.5).slice(0,5);
+ r.innerHTML=pool.map((x,i)=>`<button style="animation-delay:${i*.07}s" onclick="sugPick(${SUG.indexOf(x)})">${x[0]} ${UI==='ar'?x[1]:x[2]}</button>`).join('')}
+window.sugPick=function(i){const ta=$('#cin');ta.value=(UI==='ar'?SUG[i][1]:SUG[i][2]);chatGrow(ta);ta.focus()};
+const chatVis0=chatVis;chatVis=function(on){chatVis0(on);if(on)suggDraw()};
+const send0=chatSend;chatSend=async function(){const r=$('#sugg');if(r)r.style.display='none';const x=await send0.apply(this,arguments);setTimeout(()=>{const q=$('#sugg');if(q){suggDraw();q.style.display='flex'}},600);return x};
+/* typing indicator helper */
+window.typingOn=function(){if(!FEED)return null;const d=document.createElement('div');d.className='msg';d.innerHTML='<div class="av">🤖</div><div class="bub"><span class="typing"><i></i><i></i><i></i></span></div>';FEED.appendChild(d);d.scrollIntoView({block:'end',behavior:'smooth'});return d};
+/* powered by */
+const pf=document.createElement('div');pf.className='pwr';pf.innerHTML='⚡ Powered by <b>HOG</b>';const sf=$('#sfoot');if(sf&&sf.parentNode)sf.parentNode.appendChild(pf);
+})();
 loginView();
 SB.boot();
 </script>
