@@ -1,6 +1,6 @@
 /* Gamify Agent service worker: offline app shell */
-const VER='ga-v11-1';
-const SHELL=['./','./index.html','./manifest.webmanifest','./config.js','./icons/icon-192.png','./icons/icon-512.png','./icons/maskable-512.png','./icons/apple-touch-icon.png','./icons/favicon-32.png'];
+const VER='ga-v11-2';
+const SHELL=['./','./index.html','./manifest.webmanifest','./config.js','./hog-192.png','./hog-512.png','./hog-maskable-512.png','./hog-apple-180.png','./hog-fav-32.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(VER).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==VER).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{
