@@ -2,6 +2,8 @@
 <html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; worker-src blob: 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https: blob: data:; frame-src about: blob: data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#060a17">
 <meta name="mobile-web-app-capable" content="yes">
@@ -203,6 +205,32 @@ tr:hover td{background:var(--soft)}
 .gback{max-width:820px;margin:0 auto 8px;display:flex}
 .gback .btn{border-radius:99px}
 </style>
+<style id="splashcss">
+#splash{position:fixed;inset:0;z-index:2147483000;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 42%,#14224d 0%,#060a17 62%);overflow:hidden;transition:opacity .6s,transform .6s}
+#splash.out{opacity:0;transform:scale(1.08);pointer-events:none}
+#splash .grid{position:absolute;inset:-50%;background:linear-gradient(#22d3ee14 1px,transparent 1px),linear-gradient(90deg,#22d3ee14 1px,transparent 1px);background-size:44px 44px;transform:perspective(500px) rotateX(62deg);animation:grid 3s linear infinite;mask-image:radial-gradient(circle,#000 20%,transparent 70%)}
+@keyframes grid{to{background-position:0 44px}}
+#splash .lg{position:relative;width:176px;height:176px;animation:lgin 1s cubic-bezier(.2,1.3,.3,1) both}
+#splash .lg img{width:100%;height:100%;border-radius:38px;box-shadow:0 0 60px #22d3ee88,0 0 120px #6366f155;animation:flo 2.4s ease-in-out infinite .9s}
+#splash .ring{position:absolute;inset:-18px;border-radius:50%;border:2px solid transparent;border-top-color:#22d3ee;border-right-color:#6366f1;animation:spin 1.6s linear infinite}
+#splash .ring.r2{inset:-34px;border-top-color:#6366f1;border-right-color:transparent;border-left-color:#22d3ee;animation-duration:2.4s;animation-direction:reverse;opacity:.7}
+#splash .shine{position:absolute;inset:0;border-radius:38px;overflow:hidden}
+#splash .shine:after{content:"";position:absolute;top:-20%;left:-60%;width:40%;height:140%;background:linear-gradient(90deg,transparent,#fff9,transparent);transform:skewX(-20deg);animation:shn 2.2s .8s ease-in-out infinite}
+@keyframes shn{to{left:140%}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes lgin{0%{opacity:0;transform:scale(.3) rotate(-25deg);filter:blur(14px)}100%{opacity:1;transform:none;filter:none}}
+@keyframes flo{50%{transform:translateY(-8px)}}
+#splash .nm{margin-top:44px;font-weight:800;font-size:25px;letter-spacing:1px;display:flex;gap:1px;color:#e8ecff}
+#splash .nm span{opacity:0;transform:translateY(16px);animation:ltr .5s forwards}
+@keyframes ltr{to{opacity:1;transform:none}}
+#splash .sb{margin-top:10px;font-size:12px;letter-spacing:5px;color:#22d3ee;opacity:0;animation:ltr .8s 1.9s forwards}
+#splash .bar{position:absolute;bottom:60px;width:150px;height:3px;border-radius:3px;background:#ffffff1f;overflow:hidden}
+#splash .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#22d3ee,#6366f1);animation:ld 2.4s ease-out forwards}
+@keyframes ld{to{width:100%}}
+#splash .pt{position:absolute;width:6px;height:6px;border-radius:50%;background:#22d3ee;opacity:0;animation:pt 3s infinite}
+@keyframes pt{0%{opacity:0;transform:translateY(40px) scale(.5)}30%{opacity:.9}100%{opacity:0;transform:translateY(-160px) scale(1.4)}}
+@media (prefers-reduced-motion:reduce){#splash *{animation-duration:.01s!important;animation-delay:0s!important}}
+</style>
 </head>
 <body>
 <div id="top">
@@ -222,7 +250,7 @@ tr:hover td{background:var(--soft)}
 'use strict';
 /* ============ helpers ============ */
 const $=(s,e=document)=>e.querySelector(s);
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function store(k,v){try{if(v===undefined){const r=localStorage.getItem(k);return r?JSON.parse(r):null}localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
 let UI='en';
 const tr=(e,a)=>UI==='ar'?a:e;
@@ -409,7 +437,7 @@ function loginView(){TAB='login';
  <input id="lc" inputmode="numeric" maxlength="4" placeholder="••••" dir="ltr" style="text-align:center;font-size:24px;letter-spacing:8px" onkeydown="if(event.key==='Enter')doLogin()">
  <div class="row" style="margin-top:12px;justify-content:center"><button class="btn" onclick="doLogin()">${tr('Enter','دخول')}</button><button class="btn alt" onclick="CODE='';loginView()">${tr('New code','كود جديد')}</button></div></div>`);
 }
-function doLogin(){if($('#lc').value.trim()===CODE){LOGGED=true;beep('ok');nav();home()}else{beep('no');toast(tr('Wrong code, try again','الكود غير صحيح، حاول مرة أخرى'))}}
+function doLogin(){if($('#lc').value.trim()===CODE){LOGGED=true;try{localStorage.setItem('ga_trust',(window.SB&&SB.user)?SB.user.id:'guest')}catch(e){}beep('ok');nav();home()}else{beep('no');toast(tr('Wrong code, try again','الكود غير صحيح، حاول مرة أخرى'))}}
 
 /* ============ agent home (chat style) ============ */
 let FEED=null;
@@ -1312,7 +1340,7 @@ addEventListener('popstate',()=>{
  SB.refresh=async()=>{const s=raw('ga_sess');if(!s)return false;if(s.e>Date.now()){SB.tok=s.a;SB.user=s.u;return true}
   try{const r=await api('/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:H(),body:JSON.stringify({refresh_token:s.r})});if(r.ok){saveSess(r.j);return true}if(r.status>=400&&r.status<500){raw('ga_sess',null);SB.user=null;SB.tok=null;return false}}catch(e){}
   SB.tok=s.a;SB.user=s.u;SB.offline=true;return true};
- SB.signOut=async()=>{try{if(SB.tok)await api('/auth/v1/logout',{method:'POST',headers:H()})}catch(e){}try{localStorage.removeItem('ga_sess')}catch(e){}SB.user=null;SB.tok=null;SB.plan=null;SB.guest=false;LOGGED=false;CODE='';window.authMode='in';nav();loginView()};
+ SB.signOut=async()=>{try{if(SB.tok)await api('/auth/v1/logout',{method:'POST',headers:H()})}catch(e){}try{localStorage.removeItem('ga_sess');localStorage.removeItem('ga_trust')}catch(e){}SB.user=null;SB.tok=null;SB.plan=null;SB.guest=false;LOGGED=false;CODE='';window.authMode='in';nav();loginView()};
  SB.loadPlan=async()=>{try{const r=await api('/rest/v1/rpc/my_plan',{method:'POST',headers:H(),body:'{}'});if(r.ok&&typeof r.j==='number'){SB.plan=r.j;raw('ga_plan_srv',r.j)}else if(r.status===401){const ok=await SB.refresh();if(ok&&!SB.offline)return SB.loadPlan()}}catch(e){SB.offline=true}
   if(SB.plan==null)SB.plan=+(raw('ga_plan_srv')||0);
   try{const q=await api('/rest/v1/profiles?select=is_owner',{headers:H()});SB.owner=!!(q.ok&&q.j&&q.j[0]&&q.j[0].is_owner);raw('ga_owner',SB.owner)}catch(e){SB.owner=!!raw('ga_owner')}};
@@ -1358,7 +1386,7 @@ addEventListener('popstate',()=>{
   <div class="row" style="margin-top:10px"><button class="btn alt sm" style="color:var(--bad,#f66)" onclick="delAccount()">🗑 ${tr('Delete my account and data','احذف حسابي وبياناتي')}</button><button class="btn alt sm" onclick="closeModal()">${tr('Close','إغلاق')}</button></div>`)};
  window.delAccount=async function(){if(!confirm(tr('Delete your account and all cloud data permanently?','حذف حسابك وكل بياناتك السحابية نهائيًا؟')))return;
   const r=await api('/rest/v1/rpc/delete_my_account',{method:'POST',headers:H(),body:'{}'});if(!r.ok)return toast('⚠️ '+tr('Could not delete, try again','تعذّر الحذف، حاول مرة أخرى'),3000);closeModal();SB.signOut()};
- loginView=function(){if(SB.cfg&&!SB.user&&!SB.guest)return authView();return loginView0()};
+ loginView=function(){let t=null;try{t=localStorage.getItem('ga_trust')}catch(e){}if(t==='guest'&&!SB.user)SB.guest=true;if(SB.cfg&&!SB.user&&!SB.guest)return authView();if(t&&t===(SB.user?SB.user.id:'guest')){LOGGED=true;nav();return home()}return loginView0()};
  /* restore session on start (the on-screen code step still follows) */
  SB.boot=async function(){if(!SB.cfg)return;if(await SB.refresh()){if(!SB.offline){SB.loadPlan().then(()=>SB.pull()).then(()=>nav())}else SB.plan=+(raw('ga_plan_srv')||0);if(!LOGGED)loginView()}else if(!LOGGED)loginView()};
 })();
@@ -1431,7 +1459,7 @@ const MP=document.createElement('style');MP.textContent=`.mis{margin-top:4px}.mr
 .mlog{font-size:12px;color:var(--mut);margin-top:6px;max-height:110px;overflow:auto}.mscore{font-size:34px;font-weight:800}.cbtn.rec{background:#e11d48;color:#fff;animation:pls 1s infinite}.cbtn.on{background:var(--acc);color:#04202a}
 #ov{position:fixed;inset:0;z-index:90;background:#000;display:none;flex-direction:column}#ov.on{display:flex}#ov .ovb{display:flex;gap:8px;padding:8px;background:var(--card)}#ov iframe{flex:1;border:0;width:100%;background:#fff}`;document.head.appendChild(MP);
 const ov=document.createElement('div');ov.id='ov';document.body.appendChild(ov);
-function openGame(){if(!MISSION||!MISSION.html)return;ov.innerHTML=`<div class="ovb"><button class="btn sm" onclick="closeOv()">← ${tr('Back to chat','عودة للمحادثة')}</button><span class="sp" style="flex:1"></span><button class="btn alt sm" onclick="dlGame()">⬇ ${tr('Download','تحميل')}</button></div><iframe sandbox="allow-scripts allow-pointer-lock" title="game"></iframe>`;ov.querySelector('iframe').srcdoc=withBadge(MISSION.html);ov.classList.add('on');OVOPEN=true;try{history.pushState({ga:1},'')}catch(e){}}
+function openGame(){if(!MISSION||!MISSION.html)return;ov.innerHTML=`<div class="ovb"><button class="btn sm" onclick="closeOv()">← ${tr('Back to chat','عودة للمحادثة')}</button><span class="sp" style="flex:1"></span><button class="btn alt sm" onclick="dlGame()">⬇ ${tr('Download','تحميل')}</button><button class="btn alt sm" onclick="dlDesktop()">💻 PC</button></div><iframe sandbox="allow-scripts allow-pointer-lock" title="game"></iframe>`;ov.querySelector('iframe').srcdoc=withBadge(MISSION.html);ov.classList.add('on');OVOPEN=true;try{history.pushState({ga:1},'')}catch(e){}}
 function closeOv(){ov.classList.remove('on');ov.innerHTML='';OVOPEN=false}
 function dlGame(){if(!MISSION)return;const b=new Blob([withBadge(MISSION.html)],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(MISSION.title||'game').replace(/[^\w؀-ۿ-]+/g,'_')+'.html';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
 const RUBRIC={understanding:15,planning:10,completeness:20,functionality:20,ux:10,fixes:15,mobile:10};
@@ -1474,7 +1502,7 @@ async function runMission(task,prev){
   set(3,approved?'ok':'bad');Object.assign(M0,{html,busy:false,score:total,approved});
   const mres=b.querySelector('#mres');
   mres.innerHTML=`<div class="card" style="margin-top:10px;text-align:center"><div class="mscore">${approved?'✅':'⛔'} ${total}/100</div><b>${esc(grade)}</b><p class="mut" style="text-align:start">${esc(jr.report||'')}</p>
-   <div class="row" style="justify-content:center">${approved?`<button class="btn" onclick="openGame()">▶ ${tr('Play the game','العب اللعبة')}</button><button class="btn alt" onclick="dlGame()">⬇ ${tr('Download','تحميل')}</button>`:`<button class="btn" onclick="runMission(MISSION.task,{html:MISSION.html,fb:'Judge rejected: '+${JSON.stringify((jr.report||'').slice(0,400))}})">🔁 ${tr('Try again','حاول مجددًا')}</button><button class="btn alt" onclick="openGame()">${tr('Open anyway (not approved)','افتحها رغم ذلك (غير معتمدة)')}</button>`}</div></div>`;
+   <div class="row" style="justify-content:center">${approved?`<button class="btn" onclick="openGame()">▶ ${tr('Play the game','العب اللعبة')}</button><button class="btn alt" onclick="dlGame()">⬇ ${tr('Download','تحميل')}</button><button class="btn alt" onclick="dlDesktop()">💻 ${tr('PC package','حزمة الكمبيوتر')}</button>`:`<button class="btn" onclick="runMission(MISSION.task,{html:MISSION.html,fb:'Judge rejected: '+${JSON.stringify((jr.report||'').slice(0,400))}})">🔁 ${tr('Try again','حاول مجددًا')}</button><button class="btn alt" onclick="openGame()">${tr('Open anyway (not approved)','افتحها رغم ذلك (غير معتمدة)')}</button>`}</div></div>`;
   mres.insertAdjacentHTML('beforeend',exportRow());mres.scrollIntoView({block:'end',behavior:'smooth'});
   voiceSay(approved?tr('Your game is ready and approved with score '+total+'. Tap play.','لعبتك جاهزة ومعتمدة بدرجة '+total+'. اضغط العب.'):tr('The game was not approved. Score '+total+'.','لم تُعتمد اللعبة. الدرجة '+total+'.'));
  }catch(e){stop(e.message)}}
@@ -1650,6 +1678,26 @@ window.typingOn=function(){if(!FEED)return null;const d=document.createElement('
 /* powered by */
 const pf=document.createElement('div');pf.className='pwr';pf.innerHTML='⚡ Powered by <b>HOG</b>';const sf=$('#sfoot');if(sf&&sf.parentNode)sf.parentNode.appendChild(pf);
 })();
+
+/* ===== v13: desktop package ===== */
+window.dlDesktop=async function(){if(!MISSION||!MISSION.html)return toast(tr('No game yet','لا توجد لعبة بعد'));
+ try{toast('💻 '+tr('Preparing PC package…','جارٍ تجهيز حزمة الكمبيوتر…'),2500);await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
+ const nm=(MISSION.title||'game').replace(/[^\w؀-ۿ-]+/g,'_').slice(0,40)||'game';const z=new JSZip();const d=z.folder(nm);
+ d.file('game.html',withBadge(MISSION.html));
+ d.file('Play-Windows.bat','@echo off\r\nstart "" "%~dp0game.html"\r\n');
+ d.file('Play-Mac.command','#!/bin/sh\ncd "$(dirname "$0")"\nopen game.html\n',{unixPermissions:'755'});
+ d.file('Play-Linux.sh','#!/bin/sh\ncd "$(dirname "$0")"\nxdg-open game.html\n',{unixPermissions:'755'});
+ d.file('README.txt','HOG Gamify Anything - game package\n\nWindows: unzip, double-click Play-Windows.bat (or game.html)\nMac: unzip, double-click Play-Mac.command (or game.html)\nLinux: unzip, run Play-Linux.sh (or open game.html)\n\nWorks offline in any modern browser (Chrome, Edge, Firefox, Safari).\nTip: in Chrome/Edge you can also install it as an app: open game.html, menu > Install / Add to desktop.\n\nPowered by HOG\n');
+ const b=await z.generateAsync({type:'blob',platform:'UNIX'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=nm+'-PC.zip';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);toast('✅ '+tr('PC package downloaded','تم تنزيل حزمة الكمبيوتر'))}
+ catch(e){toast('⚠️ '+tr('Could not build ZIP (check internet)','تعذّر إنشاء ZIP (تأكد من الإنترنت)'))}};
+
+/* ===== v13: animated launch splash ===== */
+(function(){let seen=false;try{seen=sessionStorage.getItem('ga_splash')==='1'}catch(e){}if(seen)return;try{sessionStorage.setItem('ga_splash','1')}catch(e){}
+ const d=document.createElement('div');d.id='splash';const name='HOG Gamify Anything';
+ let pts='';for(let i=0;i<14;i++)pts+=`<i class="pt" style="left:${8+i*6.5}%;top:${55+(i%4)*9}%;animation-delay:${(i*.21).toFixed(2)}s"></i>`;
+ d.innerHTML=`<div class="grid"></div>${pts}<div class="lg"><div class="ring"></div><div class="ring r2"></div><div class="shine"><img src="hog-512.png" alt="HOG" onerror="this.style.display='none'"></div></div><div class="nm" dir="ltr">${[...name].map((c,i)=>`<span style="animation-delay:${(.7+i*.055).toFixed(2)}s">${c===' '?'&nbsp;':c}</span>`).join('')}</div><div class="sb">POWERED BY HOG</div><div class="bar"><i></i></div>`;
+ document.body.appendChild(d);let done=false;const end=()=>{if(done)return;done=true;d.classList.add('out');setTimeout(()=>d.remove(),700)};
+ d.onclick=end;setTimeout(end,2900);try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}})();
 loginView();
 SB.boot();
 </script>
