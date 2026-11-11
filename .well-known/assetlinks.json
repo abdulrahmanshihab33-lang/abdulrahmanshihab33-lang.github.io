@@ -1,1 +1,8 @@
-[{"relation":["delegate_permission/common.handle_all_urls"],"target":{"namespace":"android_app","package_name":"com.hog.gamifyagent","sha256_cert_fingerprints":["61:F1:7B:1D:E8:D3:FC:B7:FA:5D:41:36:61:9C:8F:DA:C9:CC:2A:F1:07:F4:77:5C:98:14:AC:0A:8F:12:D2:9C"]}}]
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "io.github.abdulrahmanshihab33_lang.hog",
+    "sha256_cert_fingerprints": ["D1:89:50:9A:70:36:6C:2F:09:61:96:C5:61:87:92:17:0A:8A:F3:B6:14:BC:EF:E0:DD:A1:06:94:E8:AB:42:78"]
+  }
+}]
