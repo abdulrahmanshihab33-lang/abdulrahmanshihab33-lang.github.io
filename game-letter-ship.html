@@ -1,0 +1,24 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Letter Ship</title><style>
+:root{--fs:22px;--ls:.04em;--bg:#fbf6ea;--ink:#2b3a3a;--acc:#3aa6a0;--soft:#e6f2ef}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible","Trebuchet MS",Verdana,Tahoma,sans-serif;font-size:var(--fs);letter-spacing:var(--ls);line-height:1.7;display:flex;flex-direction:column;align-items:center;padding:14px;text-align:center;user-select:none}
+h1{font-size:1.05em;margin:6px 0}#m{min-height:2.4em;color:#44706c}.btn{background:var(--acc);color:#fff;border:0;border-radius:16px;padding:12px 22px;font-size:.9em;font-family:inherit;margin:8px}
+.st{font-size:1.5em}.grid{display:grid;gap:12px;width:100%;max-width:420px;margin:10px auto}
+.t{background:#fff;border:3px solid var(--soft);border-radius:20px;min-height:68px;font-size:1.5em;display:grid;place-items:center;cursor:pointer;transition:transform .25s,background .3s}.t.ok{background:#cdeedb;border-color:#6cc79a;transform:scale(.96)}.t.no{animation:soft .5s}.t.glow{border-color:#f2c14e;background:#fff7dc}
+@keyframes soft{30%{transform:translateX(-5px)}60%{transform:translateX(5px)}}
+body.calm *{animation:none!important;transition:none!important}
+</style></head><body><h1>Letter Ship · سفينة الحروف</h1><div id="m"></div>
+<script>
+const P=window.HOG||{lang:'en',calm:false,sound:false};const AR=P.lang==='ar';const T=(e,a)=>AR?a:e;if(P.calm)document.body.classList.add('calm');
+const $=s=>document.querySelector(s);const say=t=>{$('#m').textContent=t};
+const GOOD=AR?['أحسنت','رائع','جميل','ممتاز','استمر']:['Nice one','Lovely','Great','Well done','Keep going'];const good=()=>GOOD[Math.floor(Math.random()*GOOD.length)];
+const done=(stars)=>{try{parent.postMessage({hogdone:'letter-ship',stars:stars},'*')}catch(e){}};
+const ping=()=>{if(!P.sound)return;try{const a=new (window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator(),g=a.createGain();o.frequency.value=660;g.gain.value=.05;o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+.12)}catch(e){}};
+
+const SETS=AR?[['ب','ت','ث','ن'],['ح','خ','ج','ع'],['د','ذ','ر','ز'],['س','ش','ص','ض']]:[['b','d','p','q'],['m','n','u','w'],['a','e','o','c'],['f','t','l','i']];
+let round=0,stars=0,target,found;const R=5;
+function start(){const set=SETS[round%SETS.length];target=set[Math.floor(Math.random()*set.length)];found=0;const need=4;const cells=[];for(let i=0;i<need;i++)cells.push(target);while(cells.length<12){const x=set[Math.floor(Math.random()*set.length)];if(x!==target)cells.push(x)}cells.sort(()=>Math.random()-.5);
+ document.body.querySelector('#g')?.remove();$('#m').insertAdjacentHTML('afterend','<div class="st" id="tg"></div><div class="grid" id="g" style="grid-template-columns:repeat(4,1fr)"></div>');
+ $('#tg').textContent=T('Find all: ','ابحث عن كل: ')+target+'  ⛵';say(T('Tap every '+target,'المس كل حرف '+target));
+ const g=$('#g');cells.forEach(c=>{const b=document.createElement('div');b.className='t';b.textContent=c;b.onclick=()=>{if(b.classList.contains('ok'))return;if(c===target){b.classList.add('ok');found++;ping();if(found===need){stars++;say(good()+' ⭐');setTimeout(next,900)}}else{b.classList.add('no');setTimeout(()=>b.classList.remove('no'),500);say(T('Almost. Look again, you can do it.','قريب. انظر مرة أخرى، أنت تستطيع.'))}};g.appendChild(b)})}
+function next(){round++;$('#tg')?.remove();if(round>=R){$('#g').remove();say(T('Your ship reached the island!','وصلت سفينتك إلى الجزيرة!'));$('#m').insertAdjacentHTML('afterend','<div class="st">'+'⭐'.repeat(stars)+'</div><button class="btn" onclick="location.reload()">'+T('Sail again','أبحر مجددًا')+'</button>');done(stars)}else start()}
+start();</script></body></html>
