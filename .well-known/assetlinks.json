@@ -3,6 +3,9 @@
   "target": {
     "namespace": "android_app",
     "package_name": "io.github.abdulrahmanshihab33_lang.hog",
-    "sha256_cert_fingerprints": ["D1:89:50:9A:70:36:6C:2F:09:61:96:C5:61:87:92:17:0A:8A:F3:B6:14:BC:EF:E0:DD:A1:06:94:E8:AB:42:78"]
+    "sha256_cert_fingerprints": [
+      "D1:89:50:9A:70:36:6C:2F:09:61:96:C5:61:87:92:17:0A:8A:F3:B6:14:BC:EF:E0:DD:A1:06:94:E8:AB:42:78",
+      "86:82:C0:A3:6D:28:71:C3:FB:66:F9:53:3E:8A:B8:E6:0F:9E:9A:5E:F1:E4:14:AE:35:0A:02:F1:1F:DC:E3:BB"
+    ]
   }
 }]
