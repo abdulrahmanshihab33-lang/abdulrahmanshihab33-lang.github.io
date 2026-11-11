@@ -1,7 +1,7 @@
 /* Gamify Agent service worker: offline app shell */
-const VER='ga-v13-3';
-const SHELL=['./','./index.html','./manifest.webmanifest','./config.js','./hog-192.png','./hog-512.png','./hog-maskable-512.png','./hog-apple-180.png','./hog-fav-32.png'];
-self.addEventListener('install',e=>{e.waitUntil(caches.open(VER).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
+const VER='ga-v14-2';
+const SHELL=['./','./index.html','./manifest.webmanifest','./config.js','./hog-192.png','./hog-512.png','./hog-maskable-512.png','./hog-apple-180.png','./hog-fav-32.png','./hog-intro.webm','./hog-poster.jpg'];
+self.addEventListener('install',e=>{e.waitUntil(caches.open(VER).then(c=>Promise.all(SHELL.map(u=>c.add(u).catch(()=>{})))).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==VER).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{
   const r=e.request;if(r.method!=='GET')return;
