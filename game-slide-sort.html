@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Slide & Sort — انزلق ورتّب</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;color:#1e293b;background:linear-gradient(135deg,#e0f2fe 0%,#fae8ff 50%,#fef3c7 100%);user-select:none;-webkit-user-select:none;touch-action:manipulation;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:12px 12px calc(12px + env(safe-area-inset-bottom))}
+.wrap{width:100%;max-width:480px;display:flex;flex-direction:column;gap:10px;flex:1}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(255,255,255,.85);border:1px solid #fff;border-radius:18px;padding:10px 12px;box-shadow:0 1px 3px #0001}
+.seg{display:flex;gap:4px;background:#f1f5f9;padding:4px;border-radius:12px}
+.seg button{border:0;background:transparent;font:800 13px inherit;color:#475569;padding:7px 12px;border-radius:9px;cursor:pointer}
+.seg button.on{background:#fff;color:#0f172a;box-shadow:0 1px 3px #0002}
+.ib{border:0;background:#f1f5f9;border-radius:12px;width:40px;height:36px;font-size:18px;cursor:pointer}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats.two{grid-template-columns:repeat(2,1fr)}
+.st{background:rgba(255,255,255,.92);border-radius:16px;padding:8px;text-align:center;box-shadow:0 1px 3px #0001}
+.st small{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8}
+.st b{font-size:24px;font-weight:900;font-variant-numeric:tabular-nums}
+.prog{background:rgba(255,255,255,.92);border-radius:16px;padding:8px 10px;box-shadow:0 1px 3px #0001}
+.prog .l{display:flex;justify-content:space-between;font-size:12px;font-weight:800;color:#64748b;margin-bottom:5px}
+.prog .t{height:14px;background:#e2e8f0;border-radius:99px;padding:2px;overflow:hidden}
+.prog .t i{display:block;height:100%;width:0;border-radius:99px;transition:width .3s;background:linear-gradient(90deg,#3b82f6,#ec4899)}
+.frame{background:#f6f3ee;border:4px solid #e3ded6;border-radius:26px;padding:14px;box-shadow:0 15px 35px #00000026,inset 0 2px 4px #ffffffe6,inset 0 -4px 8px #00000014}
+.fh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;direction:ltr}
+.badge{background:linear-gradient(180deg,#e52e2e,#b80c0c);color:#fff;font-weight:900;font-size:22px;letter-spacing:.08em;padding:5px 14px;border-radius:12px;border:2px solid #ffffff66;box-shadow:0 3px 0 #800505,inset 0 2px 2px #ffffff66}
+.ft{text-align:right;line-height:1.05}
+.ft small{display:block;font-size:11px;font-weight:800;letter-spacing:.2em;color:#0d9488;text-transform:uppercase}
+.ft b{font-size:22px;font-weight:900;letter-spacing:.08em;color:#0f766e;text-transform:uppercase}
+.inner{background:#dcd6cd;border-radius:18px;padding:10px;aspect-ratio:1/1;width:100%;box-shadow:inset 0 4px 10px #00000026;direction:ltr}
+#grid{display:grid;gap:7px;width:100%;height:100%}
+.empty{border-radius:14px;background:#0000000d;border:1px solid #0000000d}
+.tile{border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:#0f172a;box-shadow:0 4px 0 #00000026,inset 0 2px 2px #fff9,inset 0 -2px 4px #0000001a;text-shadow:0 1px 0 #ffffff66;animation:pop .18s ease-out;font-weight:900;line-height:1}
+.tile:active{box-shadow:0 1px 0 #00000026;transform:translateY(2px)}
+.tile.ok{outline:3px solid #22c55e;outline-offset:-3px}
+.tile.hint{animation:hint .6s ease-in-out 3}
+.tile span{font-weight:800;opacity:.75;letter-spacing:-.02em;margin-top:2px;text-transform:capitalize}
+.c0{background:#b9a8dc}.c1{background:#a3d8e5}.c2{background:#f9a493}.c3{background:#a0ddc3}.c4{background:#f7d363}
+@keyframes pop{from{transform:scale(.9)}to{transform:scale(1)}}
+@keyframes hint{50%{transform:scale(1.12);box-shadow:0 0 0 5px #6366f1aa}}
+.foot{display:flex;gap:8px}
+.foot button{flex:1;border:0;border-radius:16px;padding:13px 8px;color:#fff;font:800 15px inherit;cursor:pointer;box-shadow:0 3px 8px #0003}
+.foot button:active{transform:scale(.96)}
+.b1{background:#4f46e5}.b2{background:#f59e0b}.b3{background:#059669}
+#win{position:fixed;inset:0;background:#0f172a99;display:none;align-items:center;justify-content:center;padding:16px;z-index:9}
+#win.on{display:flex}
+.wc{background:#fff;border:4px solid #fcd34d;border-radius:26px;padding:24px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 50px #0006}
+.wc h2{margin:6px 0 2px;font-size:26px;font-weight:900}
+.wc p{margin:0 0 14px;color:#64748b;font-weight:700;font-size:14px}
+.stars{font-size:34px;letter-spacing:4px}
+.wg{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#f8fafc;border-radius:16px;padding:12px;margin-bottom:14px}
+.wg small{display:block;font-size:11px;font-weight:800;color:#94a3b8;text-transform:uppercase}.wg b{font-size:21px}
+.wc button{width:100%;border:0;border-radius:16px;padding:13px;font:800 15px inherit;cursor:pointer;margin-top:8px}
+.wn{background:#10b981;color:#fff}.wa{background:#f1f5f9;color:#334155}
+.hog{text-align:center;font-size:11px;font-weight:700;color:#0006;margin-top:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar">
+    <div class="seg"><button id="b3" onclick="setSize(3)">3×3</button><button id="b4" onclick="setSize(4)">4×4</button><button id="b5" onclick="setSize(5)">5×5</button></div>
+    <button class="ib" id="snd" onclick="toggleSound()" aria-label="sound">🔊</button>
+  </div>
+  <div class="stats" id="stats">
+    <div class="st" id="tcard"><small data-t="time"></small><b id="tm">00:00</b></div>
+    <div class="st"><small data-t="moves"></small><b id="mv">0</b></div>
+    <div class="st"><small data-t="best"></small><b id="bs">–</b></div>
+  </div>
+  <div class="prog"><div class="l"><span data-t="progress"></span><span id="pc">0%</span></div><div class="t"><i id="pb"></i></div></div>
+  <div class="frame">
+    <div class="fh"><div class="badge">HOG</div><div class="ft"><small data-t="sub"></small><b data-t="title"></b></div></div>
+    <div class="inner"><div id="grid"></div></div>
+  </div>
+  <div class="foot">
+    <button class="b1" onclick="shuffle()" data-t="shuffle"></button>
+    <button class="b2" id="pz" onclick="togglePause()" data-t="pause"></button>
+    <button class="b3" onclick="hint()" data-t="hint"></button>
+  </div>
+</div>
+<div id="win"><div class="wc">
+  <div class="stars" id="ws">⭐⭐⭐</div>
+  <h2 data-t="solved"></h2><p data-t="great"></p>
+  <div class="wg"><div id="wtc"><small data-t="time"></small><b id="wt">00:00</b></div><div><small data-t="moves"></small><b id="wm">0</b></div></div>
+  <button class="wn" onclick="nextLevel()" data-t="next"></button>
+  <button class="wa" onclick="closeWin();shuffle()" data-t="again"></button>
+</div></div>
+<script>
+const HG=window.HOG||null,AR=!!(HG&&HG.lang==='ar')||(!HG&&/^ar/i.test(navigator.language||'')),CALM=!!(HG&&HG.calm);
+const TX={time:['Time','الوقت'],moves:['Moves','الحركات'],best:['Best','الأفضل'],progress:['Progress','التقدم'],sub:['Slide & Sort','انزلق ورتّب'],title:['PUZZLE','لغز الكتل'],shuffle:['🔀 Shuffle','🔀 خلط'],pause:['⏸ Pause','⏸ إيقاف'],resume:['▶ Resume','▶ متابعة'],hint:['💡 Hint','💡 تلميح'],solved:['PUZZLE SOLVED!','أحسنت! حللت اللغز'],great:['Great job completing the challenge!','عمل رائع! أنهيت التحدي'],next:['Next level','المستوى التالي'],again:['Play again','العب مرة أخرى']};
+const t=k=>TX[k][AR?1:0];
+document.documentElement.lang=AR?'ar':'en';document.body.dir=AR?'rtl':'ltr';
+document.querySelectorAll('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));
+const NW={1:'one',2:'two',3:'three',4:'four',5:'five',6:'six',7:'seven',8:'eight',9:'nine',10:'ten',11:'eleven',12:'twelve',13:'thirteen',14:'fourteen',15:'fifteen',16:'sixteen',17:'seventeen',18:'eighteen',19:'nineteen',20:'twenty',21:'twenty-one',22:'twenty-two',23:'twenty-three',24:'twenty-four'};
+const $=id=>document.getElementById(id);
+let N=3,tiles=[],empty=0,moves=0,secs=0,iv=null,started=false,paused=false,sound=HG?HG.sound!==false:true,last=-1,ac=null;
+const BEST={};
+if(CALM){$('tcard').style.display='none';$('wtc').style.display='none';$('stats').classList.add('two')}
+function audio(){if(!ac)try{ac=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}return ac}
+function beep(f0,f1,d,v,type,when){if(!sound||!audio())return;try{const o=ac.createOscillator(),g=ac.createGain(),s=ac.currentTime+(when||0);o.type=type||'sine';o.frequency.setValueAtTime(f0,s);if(f1)o.frequency.exponentialRampToValueAtTime(f1,s+d);g.gain.setValueAtTime(v,s);g.gain.exponentialRampToValueAtTime(.001,s+d);o.connect(g);g.connect(ac.destination);o.start(s);o.stop(s+d+.02)}catch(e){}}
+const slideSnd=()=>beep(300,120,.08,.15);
+const winSnd=()=>[261.63,329.63,392,523.25].forEach((f,i)=>beep(f,0,.3,.2,'triangle',i*.12));
+function toggleSound(){sound=!sound;$('snd').textContent=sound?'🔊':'🔇'}
+$('snd').textContent=sound?'🔊':'🔇';
+const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+function setSize(n){N=n;[3,4,5].forEach(s=>$('b'+s).classList.toggle('on',s===n));$('grid').style.gridTemplate=`repeat(${n},1fr)/repeat(${n},1fr)`;$('grid').style.gap=n===5?'6px':'8px';shuffle()}
+function shuffle(){clearInterval(iv);secs=0;moves=0;started=false;paused=false;last=-1;$('tm').textContent='00:00';$('mv').textContent=0;$('pz').textContent=t('pause');
+  const T=N*N;let a=Array.from({length:T-1},(_,i)=>i+1);a.push(0);let e=T-1,prev=-1;
+  for(let i=0;i<N*60;i++){const r=Math.floor(e/N),c=e%N,nb=[];if(r>0)nb.push(e-N);if(r<N-1)nb.push(e+N);if(c>0)nb.push(e-1);if(c<N-1)nb.push(e+1);const pool=nb.filter(x=>x!==prev);const x=pool[Math.floor(Math.random()*pool.length)];a[e]=a[x];a[x]=0;prev=e;e=x}
+  if(a.every((v,i)=>v===(i<T-1?i+1:0)))return shuffle();
+  tiles=a;empty=e;draw();upd();$('bs').textContent=BEST[N]!=null?BEST[N]:'–'}
+function draw(hl){const g=$('grid');g.innerHTML='';const big=N===3?'34px':N===4?'26px':'20px',sm=N===3?'13px':N===4?'11px':'9px';
+  tiles.forEach((v,i)=>{const d=document.createElement('div');if(!v){d.className='empty';g.appendChild(d);return}
+    d.className='tile c'+((v-1)%5)+(v===i+1?' ok':'')+(hl===i?' hint':'');
+    d.innerHTML=`<div style="font-size:${big}">${v}</div><span style="font-size:${sm}">${NW[v]||''}</span>`;
+    d.onclick=()=>tap(i);let sx=0,sy=0;d.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+    d.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Math.abs(dx)<20&&Math.abs(dy)<20)return;if(paused)return;e.preventDefault();const r=Math.floor(i/N),c=i%N;let tg=-1;if(Math.abs(dx)>Math.abs(dy)){if(dx>0&&c<N-1)tg=i+1;else if(dx<0&&c>0)tg=i-1}else{if(dy>0&&r<N-1)tg=i+N;else if(dy<0&&r>0)tg=i-N}if(tg===empty)move(i)},{passive:false});
+    g.appendChild(d)})}
+const adj=(a,b)=>Math.abs(Math.floor(a/N)-Math.floor(b/N))+Math.abs(a%N-b%N)===1;
+function tap(i){if(paused)return;if(adj(i,empty))move(i)}
+function move(i){audio();if(!started){started=true;if(!CALM)startT()}tiles[empty]=tiles[i];tiles[i]=0;last=empty;empty=i;moves++;$('mv').textContent=moves;slideSnd();draw();upd();check()}
+function upd(){let c=0;for(let i=0;i<N*N-1;i++)if(tiles[i]===i+1)c++;const p=Math.round(c/(N*N-1)*100);$('pc').textContent=p+'%';const b=$('pb');b.style.width=p+'%';b.style.background=N===3?`linear-gradient(90deg,#60a5fa,#34d399)`:N===4?`linear-gradient(90deg,#a78bfa,#f43f5e)`:`linear-gradient(90deg,#3b82f6,#eab308,#10b981)`}
+function startT(){clearInterval(iv);iv=setInterval(()=>{secs++;$('tm').textContent=fmt(secs)},1000)}
+function check(){for(let i=0;i<N*N-1;i++)if(tiles[i]!==i+1)return;clearInterval(iv);winSnd();
+  const par=N*N;const stars=moves<=par*6?3:moves<=par*14?2:1;
+  if(BEST[N]==null||moves<BEST[N])BEST[N]=moves;
+  $('ws').textContent='⭐'.repeat(stars)+'☆'.repeat(3-stars);$('wt').textContent=fmt(secs);$('wm').textContent=moves;$('win').classList.add('on');
+  if(HG){try{parent.postMessage({hogdone:HG.id||'slide-sort',stars},'*')}catch(e){}}}
+function closeWin(){$('win').classList.remove('on')}
+function nextLevel(){closeWin();setSize(N<5?N+1:3)}
+function togglePause(){if(!started)return;paused=!paused;$('pz').textContent=paused?t('resume'):t('pause');$('grid').style.opacity=paused?.15:1;if(paused)clearInterval(iv);else if(!CALM)startT()}
+/* hint: pick the movable tile whose move lowers total distance the most (never an immediate undo) */
+function hint(){if(paused)return;let best=null,bd=1e9;const er=Math.floor(empty/N),ec=empty%N;
+  for(let i=0;i<N*N;i++){if(!tiles[i]||!adj(i,empty)||i===last&&false)continue;const v=tiles[i],tr=Math.floor((v-1)/N),tc=(v-1)%N;const before=Math.abs(Math.floor(i/N)-tr)+Math.abs(i%N-tc),after=Math.abs(er-tr)+Math.abs(ec-tc);let d=after-before;if(empty===last)d+=0;if(i===last)d+=.5;if(d<bd){bd=d;best=i}}
+  if(best!=null){draw(best);setTimeout(()=>draw(),1900)}}
+document.addEventListener('keydown',e=>{if(paused)return;const r=Math.floor(empty/N),c=empty%N;let tg=-1;if(e.key==='ArrowUp'&&r<N-1)tg=empty+N;else if(e.key==='ArrowDown'&&r>0)tg=empty-N;else if(e.key==='ArrowLeft'&&c<N-1)tg=empty+1;else if(e.key==='ArrowRight'&&c>0)tg=empty-1;if(tg>=0){e.preventDefault();move(tg)}});
+setSize(CALM?3:4);
+</script>
+</body>
+</html>
