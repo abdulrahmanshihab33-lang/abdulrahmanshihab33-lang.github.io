@@ -1108,10 +1108,10 @@ function selfTest(){const R=[];const T=(n,f)=>{try{const r=f();R.push([n,r===tru
 
 /* ============ v7: PLANS (free / paid), locks, upgrade modal ============ */
 const PLANS=[
- {id:0,icon:'🌱',n:{en:'Starter',ar:'المبتدئ'},tag:{en:'Try the engine, free',ar:'جرّب المحرّك مجانًا'},who:{en:'For curious teachers and first-time players',ar:'للمعلم الفضولي واللاعب الجديد'},price:{m:0,y:0}},
- {id:1,icon:'⚡',n:{en:'Creator',ar:'المبدع'},tag:{en:'Build your own games',ar:'ابنِ ألعابك الخاصة'},who:{en:'For teachers, coaches and game creators',ar:'للمعلمين والمدربين وصنّاع الألعاب'},price:{m:4.99,y:39}},
- {id:2,icon:'🧑‍🏫',n:{en:'Teacher Pro',ar:'المعلّم برو'},tag:{en:'Run classes with points',ar:'أدِر فصولك بنظام النقاط'},who:{en:'For teachers who run real classes every week',ar:'للمعلمين الذين يديرون فصولًا حقيقية كل أسبوع'},price:{m:9.99,y:79}},
- {id:3,icon:'🏫',n:{en:'Institution',ar:'المؤسسات'},tag:{en:'Run a whole game center',ar:'أدِر مركز ألعاب كاملًا'},who:{en:'For schools, mosques, academies and organizers',ar:'للمدارس والمساجد والأكاديميات والمنظّمين'},price:{m:29,y:249}}
+ {id:0,icon:'🌱',n:{en:'Starter',ar:'المبتدئ'},tag:{en:'Try the engine, free',ar:'جرّب المحرّك مجانًا'},who:{en:'For curious teachers and first-time players',ar:'للمعلم الفضولي واللاعب الجديد'}},
+ {id:1,icon:'⚡',n:{en:'Creator',ar:'المبدع'},tag:{en:'Build your own games',ar:'ابنِ ألعابك الخاصة'},who:{en:'For teachers, coaches and game creators',ar:'للمعلمين والمدربين وصنّاع الألعاب'}},
+ {id:2,icon:'🧑‍🏫',n:{en:'Teacher Pro',ar:'المعلّم برو'},tag:{en:'Run classes with points',ar:'أدِر فصولك بنظام النقاط'},who:{en:'For teachers who run real classes every week',ar:'للمعلمين الذين يديرون فصولًا حقيقية كل أسبوع'}},
+ {id:3,icon:'🏫',n:{en:'Institution',ar:'المؤسسات'},tag:{en:'Run a whole game center',ar:'أدِر مركز ألعاب كاملًا'},who:{en:'For schools, mosques, academies and organizers',ar:'للمدارس والمساجد والأكاديميات والمنظّمين'}}
 ];
 
 const FEAT={
@@ -1155,7 +1155,7 @@ function showUpgrade(k){const f=FEAT[k]||FEAT.tpl_all,p=PLANS[f.t];
  <div class="row" style="justify-content:center;margin-top:8px"><button class="btn" onclick="closeModal();go('plans')">💎 ${tr('View plans','عرض الخطط')}</button><button class="btn alt" onclick="closeModal();setPlan(${f.t})">👁 ${tr('Preview this plan','معاينة هذه الباقة')}</button><button class="btn alt" onclick="closeModal()">${tr('Not now','ليس الآن')}</button></div>`);return false}
 function lockCard(k){const f=FEAT[k],p=PLANS[f.t];return `<div class="card" style="text-align:center"><div class="big">🔒</div><h3>${f.i} ${esc(L(f))}</h3><p class="mut">${tr('Included in the','ضمن باقة')} ${p.icon} ${esc(L(p.n))}</p><div class="row" style="justify-content:center"><button class="btn" onclick="go('plans')">💎 ${tr('View plans','عرض الخطط')}</button><button class="btn alt" onclick="setPlan(${f.t});go('plans')">👁 ${tr('Preview','معاينة')}</button></div></div>`}
 function pcard(p,cur){const own=Object.keys(FEAT).filter(k=>FEAT[k].t===p.id);const prev=p.id?PLANS[p.id-1]:null;
- return `<div class="pcard ${cur===p.id?'cur':''}"><div class="pic">${p.icon}</div><h3>${esc(L(p.n))}</h3><div style="font-weight:800;font-size:18px;margin:2px 0">${p.price.m?`$${p.price.m}<small class="mut">/${tr('mo','شهر')}</small> · $${p.price.y}<small class="mut">/${tr('yr','سنة')}</small>`:tr('Free','مجانًا')}</div><div class="mut" style="min-height:34px">${esc(L(p.tag))}</div><div class="mut" style="font-size:12px;margin-top:2px">${esc(L(p.who))}</div>
+ return `<div class="pcard ${cur===p.id?'cur':''}"><div class="pic">${p.icon}</div><h3>${esc(L(p.n))}</h3><div style="font-weight:800;font-size:18px;margin:2px 0">${p.id?'🔒 '+tr('Premium','باقة مميزة'):tr('Free','مجانًا')}</div><div class="mut" style="min-height:34px">${esc(L(p.tag))}</div><div class="mut" style="font-size:12px;margin-top:2px">${esc(L(p.who))}</div>
  ${prev?`<div class="badge" style="margin:10px 0 4px">＋ ${tr('Everything in','كل ما في')} ${esc(L(prev.n))}</div>`:'<div style="height:10px"></div>'}
  <ul class="flist">${own.map(k=>`<li><span>${FEAT[k].i}</span><span>${esc(L(FEAT[k]))}${FEAT[k].soon?` <span class="tag p">🔜 ${tr('soon','قريبًا')}</span>`:''}</span></li>`).join('')}</ul>
  <button class="btn ${cur===p.id?'alt':''}" style="width:100%;margin-top:10px" onclick="setPlan(${p.id})">${cur===p.id?'✓ '+tr('Current preview','المعاينة الحالية'):tr('Preview this plan','معاينة هذه الباقة')}</button></div>`}
