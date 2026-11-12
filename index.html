@@ -1701,9 +1701,11 @@ window.dlDesktop=async function(){if(!MISSION||!MISSION.html)return toast(tr('No
  d.onclick=end;setTimeout(end,2900);try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}})();
 
 /* ===== v13: HOG Arena (game market) + Clarity Garden (calm learning corner) ===== */
-const MKV='15';
+const MKV='17';
 const ARSEC=[['pitch','⚽','الملاعب','Pitches'],['oasis','📖','واحة النور','Light Oasis'],['mind','🎓','قاعة العقول','Mind Hall'],['nook','🧩','ركن الألغاز','Puzzle Nook'],['kids','🎈','عالم الصغار','Little World']];
 const MKT=[
+ {id:'master-chess',file:'game-master-chess.html',sec:'mind',icon:'♟️',n:['HOG Chess','HOG شطرنج'],d:['3D chess with 6 levels from Rookie to Grandmaster, clocks, hints and undo.','شطرنج ثلاثي الأبعاد بستة مستويات من المبتدئ إلى الأستاذ الكبير، مع ساعة وتلميحات وتراجع.'],plan:0},
+ {id:'calm-chess',file:'game-master-chess.html',sec:'calm',icon:'👑',n:['HOG Calm Chess','HOG شطرنج هادئ'],d:['Chess without a clock or pressure. Gentle level, hints and unlimited undo.','شطرنج بلا ساعة ولا ضغط. مستوى لطيف وتلميحات وتراجع غير محدود.'],plan:0},
  {id:'slide-sort',file:'game-slide-sort.html',sec:'nook',icon:'🔢',n:['Slide & Sort','انزلق ورتّب'],d:['Slide the number blocks into order. 3×3, 4×4 or 5×5, with hints.','حرّك كتل الأرقام حتى تترتب. ٣×٣ أو ٤×٤ أو ٥×٥ مع تلميحات.'],plan:0},
  {id:'kick-word',file:'game-kick-the-word.html',sec:'pitch',icon:'⚽',n:['Kick the Word 3D','ركلة الكلمات 3D'],d:['Kick the ball at the right word: b/d/p/q, sounds, missing letters.','سدّد الكرة نحو الكلمة الصحيحة: حروف b d p q وأصوات وحرف ناقص.'],plan:0},
  {id:'kick-calm',file:'game-kick-the-word.html',sec:'calm',icon:'🥅',n:['Gentle Kicks','ركلات هادئة'],d:['The same word game with no lives and no pressure. 8 goals and the round is done.','نفس لعبة الكلمات بلا قلوب ولا ضغط. ٨ أهداف وتنتهي الجولة.'],plan:0},
