@@ -1651,7 +1651,7 @@ window.notify=function(title,body,kind){const a=nlist();a.unshift({t:Date.now(),
  toast('🔔 '+title,3200);
  try{if(document.hidden&&window.Notification&&Notification.permission==='granted')new Notification(title,{body:body||'',icon:'hog-192.png'})}catch(e){}};
 window.notesOpen=function(){let o=$('#nts');if(!o){o=document.createElement('div');o.id='nts';o.onclick=e=>{if(e.target===o)o.classList.remove('on')};document.body.appendChild(o)}
- const a=nlist();o.innerHTML=`<div class="pn"><div class="row"><b>🔔 ${tr('Notifications','الإشعارات')}</b><span class="sp"></span>${window.Notification&&Notification.permission==='default'?`<button class="btn alt sm" onclick="Notification.requestPermission().then(()=>notesOpen())">${tr('Allow alerts','اسمح بالتنبيهات')}</button>`:''}<button class="btn alt sm" onclick="localStorage.removeItem('${NK}');notesOpen()">🗑</button></div>
+ const a=nlist();o.innerHTML=`<div class="pn"><div class="row"><b>🔔 ${tr('Notifications','الإشعارات')}</b><span class="sp"></span>${window.Notification&&Notification.permission==='default'?`<button class="btn alt sm" onclick="permGate('notif',()=>Notification.requestPermission().then(()=>notesOpen()))">${tr('Allow alerts','اسمح بالتنبيهات')}</button>`:''}<button class="btn alt sm" onclick="localStorage.removeItem('${NK}');notesOpen()">🗑</button></div>
  ${a.length?a.map(n=>`<div class="nt"><b>${esc(n.title)}</b> ${n.body?esc(n.body):''}<small>${new Date(n.t).toLocaleString()}</small></div>`).join(''):`<p class="mut">${tr('Nothing yet. You will be notified when a game or mission is ready.','لا شيء بعد. سنخبرك عندما تجهز لعبة أو مهمة.')}</p>`}</div>`;
  o.classList.add('on');unread=0;rw('ga_unread',0);bellDraw()};
 bellDraw();
@@ -1895,6 +1895,14 @@ window.libGen=async function(whole){const n=+$('#lbn').value;const useAI=can('ai
  if(!out.length)return $('#lbo').textContent=tr('Could not build questions from this text','تعذّر بناء أسئلة من هذا النص');
  M.batches.push({subject:LB.sj,label:(whole?tr('whole book','الكتاب كله'):LB.txt).slice(0,40),qs:out.slice(0,n)});
  $('#lbo').innerHTML=`<div class="card">✅ ${tr(`${Math.min(n,out.length)} questions added to your materials`,`أُضيف ${Math.min(n,out.length)} سؤالًا إلى موادك`)}${useAI?'':'<div class="mut">'+tr('(simple local generation — connect an AI key for better questions)','(توليد محلي بسيط — اربط مفتاح الذكاء الاصطناعي لأسئلة أفضل)')+'</div>'}<div class="row" style="margin-top:8px"><button class="btn sm" onclick="go('agent')">🎮 ${tr('Start a game','ابدأ لعبة')}</button></div></div>`};
+
+/* ============ v18: friendly permission explainer (HOG-branded) ============ */
+window.permGate=function(kind,fn){let seen=false;try{seen=localStorage.getItem('ga_pg_'+kind)==='1'}catch(e){}
+ if(seen)return fn();const T={mic:['🎙️',tr('HOG needs your microphone','HOG يحتاج الميكروفون'),tr('To hear you read aloud and check your words. Sound is processed by your phone\'s speech service and is not saved by HOG.','ليسمع قراءتك ويقارنها بالنص. يعالج خدمة الصوت في هاتفك الكلام، ولا يحفظه HOG.')],
+ notif:['🔔',tr('HOG would like to notify you','HOG يودّ إرسال إشعارات'),tr('Only for things you asked for, like finished games and reminders. You can turn it off any time.','فقط لما طلبته مثل اكتمال الألعاب والتذكيرات. يمكنك إيقافها في أي وقت.')]}[kind];
+ showModal(`<div style="text-align:center">${window.hopeLogo?hopeLogo(52):''}<div class="big" style="margin-top:6px">${T[0]}</div><h3>${T[1]}</h3><p class="mut">${T[2]}</p><p class="mut" style="font-size:12px">${tr('Next, your phone will ask once to confirm.','بعدها سيسألك هاتفك مرة واحدة للتأكيد.')}</p><div class="row" style="justify-content:center"><button class="btn" id="pgok">✅ ${tr('Allow','السماح')}</button><button class="btn alt" onclick="closeModal()">${tr('Not now','ليس الآن')}</button></div></div>`);
+ $('#pgok').onclick=()=>{try{localStorage.setItem('ga_pg_'+kind,'1')}catch(e){}closeModal();fn()}};
+{const m0=window.mic;window.mic=function(){permGate('mic',()=>m0.apply(this,arguments))};const r0=window.reciteMic;window.reciteMic=function(){if(RC.rec)return r0();permGate('mic',()=>r0())}}
 
 loginView();
 SB.boot();
