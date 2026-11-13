@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>HOG Don't Touch the Purple</title>
+<style>
+:root{--g:1}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;touch-action:manipulation}
+html,body{margin:0;height:100%}
+body{font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;color:#f4efe6;
+background:radial-gradient(ellipse at 50% 0%,#4a3426,#1d130d 70%);display:flex;flex-direction:column;align-items:center;overflow-x:hidden;overflow-y:auto}
+.top{width:100%;max-width:520px;display:flex;justify-content:space-between;align-items:center;padding:12px 16px;gap:8px}
+.stat{text-align:center;min-width:64px}
+.stat b{display:block;font-size:24px}
+.stat span{font-size:12px;opacity:.7}
+.langbtn{background:#ffffff18;border:1px solid #ffffff30;color:#fff;border-radius:20px;padding:6px 12px;font-size:14px}
+.stage{position:relative;width:100%;max-width:520px;flex:1;display:flex;align-items:center;justify-content:center;padding:8px 16px}
+.device{position:relative;background:linear-gradient(#f3ead8,#e4d9c3);border-radius:28px;padding:18px;
+border:10px solid #c4239a;box-shadow:0 20px 50px #000a,inset 0 0 20px #0002;width:100%;max-width:360px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media (orientation:landscape){.device{max-width:520px}.grid{grid-template-columns:repeat(5,1fr)}.stage{padding:4px 16px}}
+.pad{aspect-ratio:1/0.62;border-radius:50%;position:relative;
+background:radial-gradient(circle at 40% 30%,#fffc,#e6e6ec 55%,#c9c9d2);
+box-shadow:inset 0 -6px 10px #0003,0 3px 6px #0004;transition:transform .06s,box-shadow .12s,background .12s}
+.pad:active{transform:scale(.94)}
+.pad.lit{background:radial-gradient(circle at 50% 45%,#fff 0,var(--c) 50%,var(--c) 100%);
+box-shadow:0 0 calc(34px*var(--g)) calc(10px*var(--g)) var(--c),inset 0 0 14px #fff8}
+.pad.bad.lit::after{content:"✕";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;text-shadow:0 0 6px #000a}
+.pad.pop{animation:pop .3s}
+@keyframes pop{50%{transform:scale(1.18)}}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.overlay{position:absolute;inset:8px 16px;background:#150d09e8;backdrop-filter:blur(6px);border-radius:24px;display:flex;
+flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;text-align:center;z-index:5}
+.overlay h1{margin:0;font-size:28px;color:#c58cff;text-shadow:0 0 18px #9a4dff}
+.overlay p{margin:0;opacity:.85;line-height:1.6}
+button.main{background:linear-gradient(#e03bb5,#a81c86);border:0;color:#fff;font-size:20px;padding:14px 36px;border-radius:30px;box-shadow:0 6px 0 #6b0f55,0 10px 20px #0008}
+button.main:active{transform:translateY(4px);box-shadow:0 2px 0 #6b0f55}
+button.sec{background:#ffffff18;border:1px solid #ffffff30;color:#fff;border-radius:20px;padding:9px 16px;font-size:15px}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center}
+input[type=tel]{font-size:28px;text-align:center;letter-spacing:10px;width:190px;padding:10px;border-radius:14px;border:2px solid #c4239a;background:#0006;color:#fff}
+input[type=range]{width:140px;accent-color:#c4239a}
+.err{color:#ff7a9a;min-height:22px}
+.hidden{display:none!important}
+
+.hud2{width:100%;max-width:520px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:0 16px}
+.banner{min-height:40px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:19px;font-weight:700;text-align:center;flex-wrap:wrap}
+.banner .sw{display:inline-block;width:26px;height:26px;border-radius:50%;box-shadow:0 0 14px 2px #fff6;border:2px solid #fff8}
+.tbar{width:100%;max-width:360px;height:7px;border-radius:6px;background:#ffffff22;overflow:hidden}
+.tbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#e03bb5,#ffc23a)}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="stat"><b id="score">0</b><span data-t="score"></span></div>
+  <div class="stat"><b id="lives">♥♥♥</b><span data-t="lives"></span></div>
+  <div class="stat"><b id="level">1</b><span data-t="level"></span></div>
+  <button class="langbtn" id="langbtn">EN</button>
+</div>
+
+<div class="hud2"><div class="banner" id="banner"></div><div class="tbar hidden" id="tbar"><i id="tfill"></i></div></div>
+
+<div class="stage">
+  <div class="device"><div class="grid" id="grid"></div></div>
+
+  <div class="overlay hidden" id="gate">
+    <h1 data-t="title"></h1>
+    <p data-t="codeprompt"></p>
+    <input id="code" type="tel" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••">
+    <div class="err" id="err"></div>
+    <button class="main" id="enter" data-t="enter"></button>
+  </div>
+
+  <div class="overlay hidden" id="menu">
+    <h1 data-t="title"></h1>
+    <p data-t="rules"></p>
+    <p><span data-t="best"></span>: <b id="best">0</b></p>
+    <button class="main" id="start" data-t="start"></button>
+    <div class="row">
+      <button class="sec" id="showbtn" data-t="show"></button>
+      <button class="sec" id="sndbtn"></button>
+      <button class="sec" id="timebtn"></button>
+    </div>
+    <div class="row"><span data-t="intensity"></span><input type="range" id="inten" min="0.4" max="2" step="0.1" value="1"></div>
+  </div>
+
+  <div class="overlay hidden" id="over">
+    <h1 data-t="over"></h1>
+    <p><span data-t="score"></span>: <b id="fscore">0</b> &nbsp;|&nbsp; <span data-t="best"></span>: <b id="fbest">0</b></p>
+    <button class="main" id="again" data-t="again"></button>
+  </div>
+</div>
+
+<script>
+const CODE='2468';               // change this code if you like
+const PURPLE='#9a4dff';
+const SAFE=['#ffffff','#46f08a','#ffc23a','#ff8a3a','#38e8e0','#ff4d4d'];   // none of these look purple
+const T={
+ar:{title:'HOG لا تلمس البنفسجي',codeprompt:'أدخل الكود للدخول',enter:'دخول',wrong:'كود غير صحيح',
+ rules:'المس اللون المضيء ليظهر التالي. من المستوى 3 المس اللون المطلوب بالاسم، ومن المستوى 5 احفظ ترتيب الأضواء وكرّره. البنفسجي فخ ✕. كل خطأ يكلّفك روحًا.',single:'المس اللون المضيء',tapTarget:'المس اللون:',memorize:'احفظ الترتيب 👀',repeat:'كرّر الترتيب بلمساتك',time:'ضغط الوقت',start:'ابدأ',show:'عرض الألوان',
+ intensity:'شدة الإضاءة',sound:'الصوت',on:'يعمل',off:'مغلق',score:'النقاط',lives:'الأرواح',level:'المستوى',best:'الأفضل',
+ over:'انتهت اللعبة',again:'العب مرة أخرى'},
+en:{title:"HOG Don't Touch the Purple",codeprompt:'Enter the code to log in',enter:'Enter',wrong:'Wrong code',
+ rules:'Tap the lit colour to reveal the next. From level 3 tap the colour you are asked for by name; from level 5 memorise the order of the lights and repeat it. Purple is a trap ✕. Every mistake costs a life.',single:'Tap the lit colour',tapTarget:'Tap the colour:',memorize:'Memorise the order 👀',repeat:'Repeat the order',time:'Time pressure',start:'Start',show:'Colour show',
+ intensity:'Light intensity',sound:'Sound',on:'On',off:'Off',score:'Score',lives:'Lives',level:'Level',best:'Best',
+ over:'Game over',again:'Play again'}
+};
+let lang='ar',sound=true,audio=null,playing=false,paused=false;
+try{if(!(navigator.language||'ar').startsWith('ar'))lang='en'}catch(e){}
+const $=id=>document.getElementById(id);
+const grid=$('grid');
+const pads=[];
+for(let i=0;i<10;i++){const d=document.createElement('div');d.className='pad';
+  d.addEventListener('pointerdown',e=>{e.preventDefault();tap(i)});grid.appendChild(d);pads.push({el:d,lit:false,bad:false,timer:null})}
+
+function applyLang(){
+  document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+  document.querySelectorAll('[data-t]').forEach(n=>n.textContent=T[lang][n.dataset.t]);
+  $('langbtn').textContent=lang==='ar'?'EN':'عربي';
+  $('sndbtn').textContent=T[lang].sound+': '+(sound?T[lang].on:T[lang].off);
+  document.title=T[lang].title;
+  $('timebtn').textContent=T[lang].time+': '+(timeMode?T[lang].on:T[lang].off);renderBanner();
+}
+$('langbtn').onclick=()=>{lang=lang==='ar'?'en':'ar';applyLang()};
+$('sndbtn').onclick=()=>{sound=!sound;applyLang()};
+$('inten').oninput=e=>document.documentElement.style.setProperty('--g',e.target.value);
+
+/* ---------- real click sound (synthesised mechanical click) ---------- */
+function ac(){if(!audio){try{audio=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}
+  if(audio&&audio.state==='suspended')audio.resume();return audio}
+function noise(a,dur){const n=Math.floor(a.sampleRate*dur),b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);
+  for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);return b}
+function clickSnd(pitch=1){
+  if(!sound)return;const a=ac();if(!a)return;const t=a.currentTime;
+  // plastic "tick": filtered noise burst
+  const s=a.createBufferSource();s.buffer=noise(a,0.03);
+  const f=a.createBiquadFilter();f.type='bandpass';f.frequency.value=2600*pitch;f.Q.value=1.2;
+  const g=a.createGain();g.gain.setValueAtTime(0.9,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.04);
+  s.connect(f);f.connect(g);g.connect(a.destination);s.start(t);
+  // body thump
+  const o=a.createOscillator(),og=a.createGain();o.frequency.setValueAtTime(220*pitch,t);o.frequency.exponentialRampToValueAtTime(90,t+0.05);
+  og.gain.setValueAtTime(0.5,t);og.gain.exponentialRampToValueAtTime(0.001,t+0.06);o.connect(og);og.connect(a.destination);o.start(t);o.stop(t+0.07);
+  // key-up release tick
+  const s2=a.createBufferSource();s2.buffer=noise(a,0.015);const g2=a.createGain();g2.gain.setValueAtTime(0.35,t+0.05);
+  g2.gain.exponentialRampToValueAtTime(0.001,t+0.07);const f2=a.createBiquadFilter();f2.type='highpass';f2.frequency.value=3500;
+  s2.connect(f2);f2.connect(g2);g2.connect(a.destination);s2.start(t+0.05);
+}
+function buzzSnd(){
+  if(!sound)return;const a=ac();if(!a)return;const t=a.currentTime;
+  const o=a.createOscillator(),g=a.createGain();o.type='sawtooth';o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(60,t+0.3);
+  g.gain.setValueAtTime(0.35,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.32);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+0.34);
+}
+function chime(){
+  if(!sound)return;const a=ac();if(!a)return;const t=a.currentTime;
+  [523,659,784,1047].forEach((fr,i)=>{const o=a.createOscillator(),g=a.createGain();o.type='triangle';o.frequency.value=fr;
+    g.gain.setValueAtTime(0.0001,t+i*.08);g.gain.exponentialRampToValueAtTime(0.25,t+i*.08+.02);g.gain.exponentialRampToValueAtTime(0.001,t+i*.08+.25);
+    o.connect(g);g.connect(a.destination);o.start(t+i*.08);o.stop(t+i*.08+.3)});
+}
+function vib(ms){try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}}
+
+/* ---------- pads ---------- */
+function setPad(i,color,bad){const p=pads[i];p.lit=true;p.bad=!!bad;p.el.style.setProperty('--c',color);
+  p.el.classList.add('lit');p.el.classList.toggle('bad',!!bad)}
+function clearPad(i){const p=pads[i];clearTimeout(p.timer);p.lit=false;p.bad=false;p.el.classList.remove('lit','bad')}
+function clearAll(){for(let i=0;i<10;i++)clearPad(i)}
+
+/* ---------- colour show ---------- */
+let showing=false,showToken=0;
+function cancelShow(){showToken++;showing=false;paused=false;clearAll()}
+function colorShow(ms=1800,done){
+  const wasPaused=showing?false:paused;            // a new show replaces any running one
+  const my=++showToken;showing=true;paused=true;clearAll();const t0=performance.now();
+  (function frame(now){
+    if(my!==showToken)return;                       // cancelled (e.g. you pressed Start)
+    const t=now-t0;if(t>ms){clearAll();showing=false;paused=wasPaused;if(done)done();return}
+    for(let i=0;i<10;i++){
+      const col=i%2,row=Math.floor(i/2);
+      const phase=(row*0.55+col*0.3)-t/260;
+      const on=Math.sin(phase*Math.PI)>-0.2;
+      if(on){const hue=(row*60+col*40+t*0.25)%360;const pr=(hue>255&&hue<290);
+        setPad(i,`hsl(${pr?200:hue},95%,60%)`,false)}else{pads[i].lit=false;pads[i].el.classList.remove('lit')}
+    }
+    requestAnimationFrame(frame);
+  })(t0);
+}
+$('showbtn').onclick=()=>{ac();colorShow();};
+
+/* ---------- game ---------- */
+/* Everything is tap-driven: no points, no level-ups and no new lights unless YOU tap.
+   Modes: single (tap the lit colour) -> target (tap the colour you're asked for) -> memory (repeat the order).
+   Purple pads are traps; they only ever appear AFTER the safe colours are shown. */
+let score=0,lives=3,level=1,best=0,combo=0,timeMode=false;
+try{best=+localStorage.getItem('dtp_best')||0}catch(e){}
+const CN={ar:['أبيض','أخضر','أصفر','برتقالي','سماوي','أحمر'],en:['White','Green','Yellow','Orange','Cyan','Red']};
+function hud(){$('score').textContent=score;$('level').textContent=level;$('lives').textContent='♥'.repeat(Math.max(lives,0))+'♡'.repeat(Math.max(3-lives,0));}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function traps(){return Math.min(5,Math.floor((level-1)/2))}      // none in levels 1-2
+let R={active:false,busy:false,mode:'',id:0},roundId=0,bState=null,lastColor=-1;
+function lightSafe(i,ci){setPad(i,SAFE[ci],false);pads[i].ci=ci}
+function okRound(id){return playing&&R.id===id&&R.active}
+
+/* banner */
+function banner(key,ci){bState=key?{key:key,ci:ci}:null;renderBanner()}
+function renderBanner(){
+  const b=$('banner');b.textContent='';if(!bState)return;const t=T[lang];
+  if(bState.key==='target'){
+    const s1=document.createElement('span');s1.textContent=t.tapTarget;b.appendChild(s1);
+    const sw=document.createElement('span');sw.className='sw';sw.style.background=SAFE[bState.ci];b.appendChild(sw);
+    const nm=document.createElement('span');nm.textContent=CN[lang][bState.ci];b.appendChild(nm);
+  }else{const s=document.createElement('span');s.textContent=t[bState.key];b.appendChild(s)}
+}
+
+/* optional time pressure: only ever costs a life, never gives points */
+let tmr=null,tStart=0,tDur=0;
+function stopTimer(){clearInterval(tmr);tmr=null;$('tbar').classList.add('hidden')}
+function startTimer(id){
+  stopTimer();if(!timeMode)return;
+  tDur=Math.max(2200,6500-level*330)+(R.mode==='memory'?R.seq.length*900:0);tStart=performance.now();
+  $('tbar').classList.remove('hidden');
+  tmr=setInterval(()=>{
+    if(!okRound(id)){stopTimer();return}
+    if(paused||showing||R.busy){tStart+=80;return}
+    const left=1-(performance.now()-tStart)/tDur;$('tfill').style.width=Math.max(0,left*100)+'%';
+    if(left<=0){stopTimer();if(wrong(null))return;if(R.mode==='memory')playSeq();else{R.active=false;nextRound()}}
+  },80);
+}
+
+/* mistakes */
+function wrong(i){
+  buzzSnd();vib(200);if(i!=null)clearPad(i);lives--;combo=0;
+  const d=grid.parentElement;d.classList.remove('shake');void grid.offsetWidth;d.classList.add('shake');hud();
+  if(lives<=0){end();return true}return false}
+
+/* rounds */
+function modeFor(){if(level<=2)return'single';if(level<=4)return'target';return Math.random()<.5?'target':'memory'}
+function nextRound(){
+  if(!playing||R.active)return;
+  if(paused||showing){setTimeout(nextRound,200);return}
+  clearAll();const id=++roundId,mode=modeFor(),order=shuffle([0,1,2,3,4,5,6,7,8,9]);
+  R={active:true,busy:false,mode:mode,id:id};
+  if(mode==='single'){
+    let ci;do{ci=Math.floor(Math.random()*SAFE.length)}while(ci===lastColor);lastColor=ci;
+    lightSafe(order[0],ci);R.rest=order.slice(1);banner('single');
+    lateTraps(id,R.rest,traps());startTimer(id);
+  }else if(mode==='target'){
+    const k=Math.min(2+Math.floor(level/2),6),cols=shuffle([0,1,2,3,4,5]).slice(0,k);
+    let t=cols[Math.floor(Math.random()*k)];if(t===lastColor&&k>1)t=cols.find(c=>c!==lastColor);lastColor=t;R.target=t;
+    cols.forEach((c,s)=>lightSafe(order[s],c));R.rest=order.slice(k);banner('target',t);
+    lateTraps(id,R.rest,Math.min(traps(),R.rest.length));startTimer(id);
+  }else{
+    const len=Math.min(2+Math.floor((level-3)/2),6);R.seq=order.slice(0,len);R.rest=order.slice(len);
+    R.cols=R.seq.map(()=>Math.floor(Math.random()*SAFE.length));playSeq();
+  }
+}
+function lateTraps(id,rest,n){            // purple joins 0.6 s AFTER the safe colours, never first, never alone
+  if(n<=0)return;
+  setTimeout(()=>{if(!okRound(id)||paused||showing)return;for(let k=0;k<n&&k<rest.length;k++)setPad(rest[k],PURPLE,true)},600);
+}
+function playSeq(){
+  const id=R.id;R.busy=true;R.idx=0;clearAll();stopTimer();banner('memorize');
+  const step=Math.max(380,700-level*18);
+  R.seq.forEach((pi,s)=>{
+    setTimeout(()=>{if(!okRound(id))return;lightSafe(pi,R.cols[s]);clickSnd(1+s*.12)},500+s*step);
+    setTimeout(()=>{if(!okRound(id))return;clearPad(pi)},500+s*step+Math.round(step*.62));
+  });
+  setTimeout(()=>{if(!okRound(id))return;R.busy=false;banner('repeat');
+    const n=Math.min(traps(),R.rest.length);for(let k=0;k<n;k++)setPad(R.rest[k],PURPLE,true);startTimer(id)},500+R.seq.length*step+250);
+}
+function advance(){
+  stopTimer();R.active=false;const nl=1+Math.floor(score/150);hud();
+  if(nl>level){level=nl;hud();chime();banner(null);colorShow(1500,nextRound)}else nextRound();
+}
+
+/* taps */
+function tap(i){
+  if(!playing||paused||showing)return;const p=pads[i];
+  p.el.classList.remove('pop');void p.el.offsetWidth;p.el.classList.add('pop');
+  if(!R.active||R.busy){clickSnd(.8);return}
+  if(R.mode==='memory'){
+    if(p.bad){wrong(i);return}
+    if(i===R.seq[R.idx]){
+      clickSnd(1+R.idx*.05);vib(15);const col=R.cols[R.idx];lightSafe(i,col);setTimeout(()=>clearPad(i),220);
+      score+=8;R.idx++;hud();
+      if(R.idx>=R.seq.length){score+=25;combo++;R.busy=true;hud();setTimeout(()=>{if(playing)advance()},260)}
+      return}
+    if(!wrong(null))playSeq();return;                 // wrong pad: lose a life, order is replayed
+  }
+  if(!p.lit){clickSnd(.8);return}                      // empty pad: just a click, no penalty
+  if(p.bad){wrong(i);return}
+  if(R.mode==='target'&&p.ci!==R.target){wrong(i);return}   // wrong colour: lose a life
+  clickSnd(1+Math.min(combo,8)*.03);vib(15);combo++;
+  score+=(R.mode==='target'?15:10)+Math.min(combo,10);advance();
+}
+
+function begin(){ac();cancelShow();stopTimer();score=0;lives=3;level=1;combo=0;lastColor=-1;playing=true;paused=false;
+  R={active:false,busy:false,mode:'',id:++roundId};hud();banner(null);
+  ['menu','over'].forEach(x=>$(x).classList.add('hidden'));setTimeout(nextRound,400)}
+function end(){playing=false;R.active=false;stopTimer();banner(null);clearAll();
+  if(score>best){best=score;try{localStorage.setItem('dtp_best',best)}catch(e){}}
+  $('fscore').textContent=score;$('fbest').textContent=best;$('best').textContent=best;$('over').classList.remove('hidden');colorShow(1200)}
+$('start').onclick=begin;$('again').onclick=begin;
+$('timebtn').onclick=()=>{timeMode=!timeMode;applyLang()};
+/* safety net: if a round is playing and no round is active, start the next one (changes no score) */
+setInterval(()=>{if(playing&&!paused&&!showing&&!R.active)nextRound()},400);
+
+/* ---------- login by code ---------- */
+function tryCode(){
+  if($('code').value.trim()===CODE){try{sessionStorage.setItem('dtp_ok','1')}catch(e){}unlock()}
+  else{$('err').textContent=T[lang].wrong;$('gate').classList.remove('shake');void $('gate').offsetWidth;$('gate').classList.add('shake');vib(120)}
+}
+function unlock(){$('gate').classList.add('hidden');$('menu').classList.remove('hidden');ac();setTimeout(()=>colorShow(2000),200)}
+$('enter').onclick=tryCode;$('code').addEventListener('keydown',e=>{if(e.key==='Enter')tryCode()});
+$('best').textContent=best;applyLang();hud();
+unlock();
+
+/* ---- HOG hooks ---- */
+(function(){const H=window.HOG;if(!H)return;
+  if(H.lang==='en')lang='en';else if(H.lang==='ar')lang='ar';
+  if(H.sound===false)sound=false;applyLang();unlock();   // already signed in to HOG: skip the code gate
+  const _end=end;end=function(){_end();if(score>=50)try{parent.postMessage({hogdone:H.id||'hog-purple',stars:score>=300?3:score>=150?2:1},'*')}catch(e){}};
+})();
+</script>
+</body>
+</html>

@@ -417,10 +417,10 @@ function goHome(force){if(force!==true&&G&&G.live&&G.view!=='end'){showModal(`<d
 function nav(){const n=$('#nav');document.body.classList.toggle('hasside',!!LOGGED);const mb=$('#menubtn');if(mb)mb.style.display=LOGGED?'':'none';const hb=$('#homebtn');if(hb)hb.style.display=LOGGED?'inline-block':'none';
  if(!LOGGED){n.innerHTML='';$('#sfoot').innerHTML='';return}
  const lk=k=>k&&!can(k)?'<span class="lk">🔒</span>':'';
- const inGame=!!(G&&G.live);const grp=[[tr('Agent','الوكيل'),inGame?[['agent','🎮',tr('Back to game','العودة للعبة')],['home','💬',tr('Agent chat','محادثة الوكيل')]]:[['agent','💬',tr('Agent chat','محادثة الوكيل')],['chats','🗂️',tr('Chat history','سجل المحادثات')],['mycre','🎨',tr('My creations','إبداعاتي')]]],[tr('Play','اللعب'),[['bank','🏦',tr('Points Bank','بنك النقاط')],['market','🛒',tr('Cards Market','سوق البطاقات')],['genius','🌟',tr('Genius Area','منطقة العباقرة')],['board','🏆',tr('Hall of Fame','لوحة الشرف')],['qbank','📚',tr('Question Bank','بنك الأسئلة'),'bank'],['puzzles','🧩',tr('Puzzle Bank','بنك الألغاز'),'puzzles'],['arena','🏟️',tr('HOG Arena','ساحة HOG')],['calm','🌅','Hopelyxia'],['recite','🎙️',tr('Recitation coach','مصحّح التلاوة'),'recite'],['booklib','📖',tr('Book library','مكتبة الكتب'),'booklib']]],[tr('Account','الحساب'),[['plans','💎',tr('Plans','الخطط')],['terms','📜',tr('Game Terms','شروط اللعبة')]]]];
+ const inGame=!!(G&&G.live);const grp=[[tr('Agent','الوكيل'),inGame?[['agent','🎮',tr('Back to game','العودة للعبة')],['home','💬',tr('Agent chat','محادثة الوكيل')]]:[['agent','💬',tr('Agent chat','محادثة الوكيل')],['chats','🗂️',tr('Chat history','سجل المحادثات')],['mycre','🎨',tr('My creations','إبداعاتي')]]],[tr('Play','اللعب'),[['bank','🏦',tr('Points Bank','بنك النقاط')],['market','🛒',tr('Cards Market','سوق البطاقات')],['genius','🌟',tr('Genius Area','منطقة العباقرة')],['board','🏆',tr('Hall of Fame','لوحة الشرف')],['qbank','📚',tr('Question Bank','بنك الأسئلة'),'bank'],['puzzles','🧩',tr('Puzzle Bank','بنك الألغاز'),'puzzles'],['arena','🏟️',tr('HOG Arena','ساحة HOG')],['calm','🌅','Hopelyxia'],['recite','🎙️',tr('Recitation coach','مصحّح التلاوة'),'recite'],['booklib','📖',tr('Book library','مكتبة الكتب'),'booklib']]],[tr('Account','الحساب'),[['portfolio','🗂️',tr('Export portfolio','تصدير معرضي')],['feedback','💬','HOG Feedback'],...(SB.owner?[['inbox','📥',tr('Feedback inbox','صندوق الملاحظات')+(window.FBU?' ('+window.FBU+')':'')]]:[]),['plans','💎',tr('Plans','الخطط')],['terms','📜',tr('Game Terms','شروط اللعبة')]]]];
  n.innerHTML=grp.map(g=>`<div class="sgrp">${g[0]}</div>`+g[1].map(t=>`<button class="sitem ${TAB===t[0]?'on':''}" onclick="go('${t[0]}')"><span class="si">${t[1]}</span><span>${t[2]}</span>${lk(t[3])}</button>`).join('')).join('');
  const p=PLANS[planIdx()];$('#sfoot').innerHTML=`<div class="planpill"><div class="mut" style="font-size:11px">${tr('Current plan','الباقة الحالية')}</div><b>${p.icon} ${esc(L(p.n))}</b><button class="btn sm" style="width:100%;margin-top:8px" onclick="go('plans')">💎 ${planIdx()<3?tr('See upgrades','شاهد الترقيات'):tr('Plans','الخطط')}</button></div>${SB.user?`<button class="btn alt sm" style="width:100%;margin-top:8px" onclick="accountModal()">👤 ${esc(SB.user.email||'')}</button>`:(SB.cfg?`<button class="btn alt sm" style="width:100%;margin-top:8px" onclick="SB.guest=false;LOGGED=false;nav();loginView()">🔑 ${tr('Sign in to sync','سجّل الدخول للمزامنة')}</button>`:'')}${isStandalone()?'':`<button class="btn alt sm" style="width:100%;margin-top:8px" onclick="installApp()">📲 ${tr('Install app','ثبّت التطبيق')}</button>`}`}
-function go(t){if(t==='home')return goHome();TAB=t;toggleSide(false);nav();clearTimer();({agent:()=>(G&&G.live?renderGame():home()),bank:bankView,market:marketView,genius:geniusView,qbank:qbView,board:boardView,terms:termsView,plans:plansView,puzzles:puzzlesView,arena:arenaView,calm:calmView,chats:chatsView,mycre:creView,recite:reciteView,booklib:booklibView})[t]()}
+function go(t){if(t==='home')return goHome();TAB=t;toggleSide(false);nav();clearTimer();({agent:()=>(G&&G.live?renderGame():home()),bank:bankView,market:marketView,genius:geniusView,qbank:qbView,board:boardView,terms:termsView,plans:plansView,puzzles:puzzlesView,arena:arenaView,calm:calmView,chats:chatsView,mycre:creView,recite:reciteView,booklib:booklibView,portfolio:portView,feedback:fbView,inbox:inboxView})[t]()}
 let LASTKEY='',PREV={},PREVW={};
 function stage(h,key){const el=$('#stage');el.innerHTML=h;chatVis(key==='home');let k=key;if(!k){k=TAB+'|'+(G&&G.view?G.view+((G.q&&G.q.q&&G.q.q.q)?((G.q.q.q.en||G.q.q.q.ar||'').slice(0,14)+G.q.step):''):'')}
  if(k!==LASTKEY){el.classList.remove('enter');void el.offsetWidth;el.classList.add('enter');window.scrollTo({top:0})}LASTKEY=k;animateNums()}
@@ -1136,6 +1136,7 @@ const FEAT={
  nobadge:{t:1,i:'🚫',en:'No HOG badge on your exported games',ar:'بدون شارة HOG على ألعابك المصدّرة'},
  bankSearch:{t:1,i:'🔎',en:'Agent searches the question bank for your game (no files needed)',ar:'الوكيل يبحث في بنك الأسئلة للعبتك (بدون رفع ملفات)'},
  puzzles:{t:1,i:'🧩',en:'Puzzle Bank + the agent designs new puzzles',ar:'بنك الألغاز + الوكيل يصمّم ألغازًا جديدة'},
+ portfolio_pro:{t:1,i:'🗂️',en:'Portfolio export: extra templates, no HOG badge',ar:'تصدير المعرض: قوالب إضافية وبدون شارة HOG'},
  export_basic:{t:1,i:'📤',en:'Export questions as PDF worksheet, CSV and JSON',ar:'تصدير الأسئلة كورقة PDF وCSV وJSON'},
  export_docs:{t:2,i:'📝',en:'Export to Word and PowerPoint',ar:'التصدير إلى Word وPowerPoint',soon:1},
  export_scorm:{t:3,i:'🎓',en:'SCORM export for school learning platforms',ar:'تصدير SCORM لمنصات التعلم المدرسية',soon:1},
@@ -1306,7 +1307,19 @@ async function installApp(){
  if(DEFERRED){DEFERRED.prompt();try{await DEFERRED.userChoice}catch(e){}DEFERRED=null;return}
  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
  showModal(`<div style="text-align:center"><div class="big">📲</div><h3>${tr('Install HOG Gamify Anything','ثبّت HOG Gamify Anything')}</h3></div><p>${ios?tr('Tap the Share button, then "Add to Home Screen".','اضغط زر المشاركة ثم «إضافة إلى الشاشة الرئيسية».'):tr('Open the browser menu (⋮), then "Install app" or "Add to Home screen".','افتح قائمة المتصفح (⋮) ثم «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».')}</p><div class="row" style="justify-content:center"><button class="btn" onclick="closeModal()">OK</button></div>`)}
-if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
+  const hadCtl=!!navigator.serviceWorker.controller;
+  function updBar(){if(document.getElementById('hogUpd'))return;const d=document.createElement('div');d.id='hogUpd';
+    d.style.cssText='position:fixed;left:10px;right:10px;bottom:14px;z-index:99999;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:14px;background:#2b1b4d;color:#fff;border:1px solid #a78bfa;box-shadow:0 8px 28px #0008;font:600 14px system-ui';
+    const t=document.createElement('span');t.textContent=(typeof tr==='function'?tr('New update ready','تحديث جديد جاهز'):'New update ready');
+    const bt=document.createElement('button');bt.textContent=(typeof tr==='function'?tr('Update now','حدّث الآن'):'Update now');
+    bt.style.cssText='background:#a78bfa;color:#1a0f33;border:0;border-radius:10px;padding:8px 14px;font:700 14px system-ui';bt.onclick=()=>location.reload();
+    const x=document.createElement('button');x.textContent='✕';x.style.cssText='background:none;border:0;color:#fff;font-size:16px';x.onclick=()=>d.remove();
+    d.append(t,bt,x);document.body.appendChild(d)}
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadCtl)updBar()});
+  addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>{
+    const chk=()=>{try{r.update()}catch(e){}};document.addEventListener('visibilitychange',()=>{if(!document.hidden)chk()});setInterval(chk,30*60*1000);
+  }).catch(()=>{}))}
 
 
 /* ============ v8.1: hardware back button ============ */
@@ -1359,6 +1372,7 @@ addEventListener('popstate',()=>{
    if(r.status===429)throw new Error(tr('Daily AI limit reached, try tomorrow','بلغت الحد اليومي للذكاء الاصطناعي، جرّب غدًا'));
    if(!r.ok||!r.j||typeof r.j.text!=='string')throw new Error(tr('AI service error','خطأ في خدمة الذكاء الاصطناعي')+' ('+(r.j&&r.j.error||r.status)+')');
    return r.j.text}finally{clearTimeout(to)}};
+ SB.api=api;SB.H=H;
  SB.afterLogin=async()=>{await SB.loadPlan();await SB.pull();nav()};
  /* auth screen */
  const loginView0=loginView;
@@ -1701,9 +1715,14 @@ window.dlDesktop=async function(){if(!MISSION||!MISSION.html)return toast(tr('No
  d.onclick=end;setTimeout(end,2900);try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}})();
 
 /* ===== v13: HOG Arena (game market) + Clarity Garden (calm learning corner) ===== */
-const MKV='17';
+const MKV='19';
 const ARSEC=[['pitch','⚽','الملاعب','Pitches'],['oasis','📖','واحة النور','Light Oasis'],['mind','🎓','قاعة العقول','Mind Hall'],['nook','🧩','ركن الألغاز','Puzzle Nook'],['kids','🎈','عالم الصغار','Little World']];
 const MKT=[
+ {id:'hog-purple',file:'game-purple.html',sec:'nook',icon:'🟣',n:["HOG Don't Touch the Purple",'HOG لا تلمس البنفسجي'],d:['Tap the right colour, memorise the lights, and never touch the purple trap.','المس اللون الصحيح، احفظ ترتيب الأضواء، ولا تلمس فخ البنفسجي أبدًا.'],plan:0},
+ {id:'hog-cue-clash',file:'game-cue-clash.html',sec:'pitch',icon:'🎱',n:['HOG Cue Clash','HOG كيو كلاش'],d:['Offline pool with 5 game modes, spin, fine aim and CPU levels.','بلياردو بدون إنترنت بخمسة أنماط وتحكم بالدوران وتصويب دقيق ومستويات كمبيوتر.'],plan:0},
+ {id:'hog-say-color',file:'game-say-color.html',sec:'mind',icon:'🎨',n:['HOG Say the Color','HOG قل اللون'],d:['Stroop reflex test: pick the ink colour, not the word. Three speeds.','اختبار سرعة البديهة: اختر لون الحبر لا الكلمة المكتوبة، بثلاث سرعات.'],plan:0},
+ {id:'cross-math',file:'game-cross-math.html',sec:'nook',icon:'➗',n:['HOG Cross Math','HOG الحساب المتقاطع'],d:['Arithmetic crosswords and target-sum puzzles, 4 levels with timers.','كلمات متقاطعة حسابية وألغاز الهدف الرقمي، أربعة مستويات مع مؤقت.'],plan:0},
+ {id:'calm-math',file:'game-cross-math.html',sec:'calm',icon:'🧮',n:['HOG Calm Math','HOG حساب هادئ'],d:['The same number puzzles with no timer. Beginner and intermediate only.','نفس ألغاز الأرقام بلا مؤقت. مستويان مبتدئ ومتوسط فقط.'],plan:0},
  {id:'master-chess',file:'game-master-chess.html',sec:'mind',icon:'♟️',n:['HOG Chess','HOG شطرنج'],d:['3D chess with 6 levels from Rookie to Grandmaster, clocks, hints and undo.','شطرنج ثلاثي الأبعاد بستة مستويات من المبتدئ إلى الأستاذ الكبير، مع ساعة وتلميحات وتراجع.'],plan:0},
  {id:'calm-chess',file:'game-master-chess.html',sec:'calm',icon:'👑',n:['HOG Calm Chess','HOG شطرنج هادئ'],d:['Chess without a clock or pressure. Gentle level, hints and unlimited undo.','شطرنج بلا ساعة ولا ضغط. مستوى لطيف وتلميحات وتراجع غير محدود.'],plan:0},
  {id:'slide-sort',file:'game-slide-sort.html',sec:'nook',icon:'🔢',n:['Slide & Sort','انزلق ورتّب'],d:['Slide the number blocks into order. 3×3, 4×4 or 5×5, with hints.','حرّك كتل الأرقام حتى تترتب. ٣×٣ أو ٤×٤ أو ٥×٥ مع تلميحات.'],plan:0},
@@ -1912,6 +1931,76 @@ window.permGate=function(kind,fn){let seen=false;try{seen=localStorage.getItem('
 
 loginView();
 SB.boot();
+
+/* ================= v20: Portfolio export · HOG Feedback · local reminders ================= */
+const _jp=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||'null')||d}catch(e){return d}};
+const _sp=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const _st2=document.createElement('style');_st2.textContent='.fbk{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.fbk button{flex:1 1 90px}.fbk button.on{outline:2px solid var(--acc,#a78bfa);background:#a78bfa33}.fbs span{font-size:32px;cursor:pointer;opacity:.35}.fbs span.on{opacity:1}.fbi{border:1px solid #ffffff22;border-radius:12px;padding:10px;margin:8px 0}.fbi.unread{border-color:#a78bfa}.fbi small{display:block;opacity:.65;margin-top:4px}#fbtxt,#pfname,#pftag{width:100%;box-sizing:border-box}#fbtxt{min-height:120px}';document.head.appendChild(_st2);
+
+/* ---------- Portfolio export ---------- */
+function pfData(){const p=_jp('ga_calm',{});return Object.keys(p).map(id=>{const m=MKT.find(x=>x.id===id);return m?{icon:m.icon,name:tr(m.n[0],m.n[1]),stars:Math.min(3,+p[id]||1)}:null}).filter(Boolean).sort((a,b)=>b.stars-a.stars)}
+async function pfBuild(){
+  const name=($('#pfname')&&$('#pfname').value.trim())||_jp('ga_pf',{}).name||(SB.user&&SB.user.email?SB.user.email.split('@')[0]:tr('HOG Player','لاعب HOG'));
+  const tag=($('#pftag')&&$('#pftag').value.trim())||_jp('ga_pf',{}).tag||'';
+  const th=window.PFTH||'classic';_sp('ga_pf',{name,tag,th});
+  const games=pfData();let cre=[];try{cre=await creClean()}catch(e){}
+  const stars=games.reduce((a,g)=>a+g.stars,0);const ar=UI==='ar';
+  const T={classic:['#f7f3ff','#2b1b4d','#7c3aed','#ffffff'],neon:['#0b0d17','#f4f4ff','#22e6c8','#151a2e'],paper:['#fbf6ec','#3b2f1f','#c2410c','#fffdf7']}[can('portfolio_pro')?th:'classic']||['#f7f3ff','#2b1b4d','#7c3aed','#ffffff'];
+  const badge=can('portfolio_pro')?'':`<p class="b">${ar?'صُنع بـ HOG':'Made with HOG'} · Powered by HOG</p>`;
+  const card=g=>`<div class="c"><div class="i">${g.icon}</div><b>${esc(g.name)}</b><div class="s">${'★'.repeat(g.stars)}${'☆'.repeat(3-g.stars)}</div></div>`;
+  return `<!doctype html><html lang="${ar?'ar':'en'}" dir="${ar?'rtl':'ltr'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(name)} · HOG Portfolio</title><style>*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;background:${T[0]};color:${T[1]};line-height:1.6}.w{max-width:760px;margin:0 auto;padding:28px 16px 60px}.h{text-align:center;padding:28px 12px;border-radius:24px;background:${T[3]};border:1px solid ${T[2]}55;box-shadow:0 10px 40px ${T[2]}22}.av{width:84px;height:84px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:42px;background:${T[2]};color:#fff}h1{margin:.2em 0;font-size:28px}.tg{opacity:.8}.st{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}.st span{background:${T[2]}22;color:${T[2]};padding:6px 14px;border-radius:20px;font-weight:700}h2{margin:30px 4px 10px;font-size:18px;color:${T[2]}}.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}.c{background:${T[3]};border:1px solid ${T[2]}33;border-radius:18px;padding:14px;text-align:center}.c .i{font-size:34px}.c b{display:block;margin:4px 0}.s{color:#f5b301;letter-spacing:2px}.l{background:${T[3]};border:1px solid ${T[2]}33;border-radius:14px;padding:10px 14px;margin:8px 0}.b{text-align:center;opacity:.6;font-size:12px;margin-top:36px}</style></head><body><div class="w"><div class="h"><div class="av">${esc(name.slice(0,1).toUpperCase())}</div><h1>${esc(name)}</h1>${tag?`<div class="tg">${esc(tag)}</div>`:''}<div class="st"><span>🎮 ${games.length} ${ar?'لعبة':'games'}</span><span>⭐ ${stars}</span><span>🎨 ${cre.length} ${ar?'إبداع':'creations'}</span></div></div>
+${games.length?`<h2>🏟️ ${ar?'ألعاب لعبتها':'Games played'}</h2><div class="g">${games.map(card).join('')}</div>`:''}
+${cre.length?`<h2>🎨 ${ar?'ألعاب صنعتها':'Games I made'}</h2>${cre.map(c=>`<div class="l"><b>${esc(c.title||'')}</b> <small style="opacity:.6">${new Date(c.ts).toLocaleDateString()}</small></div>`).join('')}`:''}
+${!games.length&&!cre.length?`<p style="text-align:center;opacity:.7">${ar?'ابدأ اللعب لتظهر إنجازاتك هنا.':'Start playing to fill your portfolio.'}</p>`:''}${badge}</div></body></html>`}
+window.pfThemeSet=t=>{if(t!=='classic'&&!can('portfolio_pro'))return showUpgrade('portfolio_pro');window.PFTH=t;portView()};
+window.pfPreview=async()=>{const h=await pfBuild();showModal(`<h3>🗂️ ${tr('Preview','معاينة')}</h3><iframe sandbox="" style="width:100%;height:60vh;border:1px solid #ffffff33;border-radius:12px;background:#fff" srcdoc="${h.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"></iframe><div class="row" style="margin-top:8px"><button class="btn" onclick="pfDownload()">⬇ ${tr('Download','تنزيل')}</button><button class="btn alt" onclick="closeModal()">${tr('Close','إغلاق')}</button></div>`)};
+window.pfDownload=async()=>{const h=await pfBuild();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([h],{type:'text/html'}));a.download='HOG-portfolio.html';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast('✅ '+tr('Portfolio downloaded','تم تنزيل المعرض'))};
+window.portView=function(){TAB='portfolio';nav();clearTimer();const s=_jp('ga_pf',{});window.PFTH=window.PFTH||s.th||'classic';const g=pfData(),pro=can('portfolio_pro');
+ stage(`<div class="card"><h3>🗂️ ${tr('Export my portfolio','تصدير معرضي')}</h3><p class="mut">${tr('One professional HTML page with the games you played, your stars and your creations. Works offline, share it anywhere.','صفحة HTML احترافية واحدة فيها الألعاب التي لعبتها ونجومك وإبداعاتك. تعمل بدون إنترنت وتشاركها أينما شئت.')}</p>
+ <label class="mut">${tr('Your name','اسمك')}</label><input id="pfname" class="inp" maxlength="40" value="${esc(s.name||(SB.user&&SB.user.email?SB.user.email.split('@')[0]:''))}">
+ <label class="mut">${tr('One line about you (optional)','سطر عنك (اختياري)')}</label><input id="pftag" class="inp" maxlength="90" value="${esc(s.tag||'')}">
+ <div class="mut" style="margin-top:10px">${tr('Template','القالب')}</div><div class="fbk">${[['classic','🌸',tr('Classic','كلاسيك')],['neon','🌌',tr('Neon','نيون')],['paper','📜',tr('Paper','ورقي')]].map(t=>`<button class="btn alt sm ${window.PFTH===t[0]?'on':''}" onclick="pfThemeSet('${t[0]}')">${t[1]} ${t[2]}${t[0]!=='classic'&&!pro?' 🔒':''}</button>`).join('')}</div>
+ <p class="mut">🎮 ${g.length} ${tr('games played','ألعاب لُعبت')} · ${pro?tr('No HOG badge','بدون شارة HOG'):tr('Free export carries a small "Made with HOG" badge','التصدير المجاني يحمل شارة صغيرة «صُنع بـ HOG»')}</p>
+ <div class="row"><button class="btn" onclick="pfPreview()">👁 ${tr('Preview','معاينة')}</button><button class="btn alt" onclick="pfDownload()">⬇ ${tr('Download .html','تنزيل .html')}</button></div></div>`)};
+
+/* ---------- HOG Feedback ---------- */
+window.FB=window.FB||{kind:'idea',stars:0};
+const fbSb=()=>SB.cfg&&SB.api;
+window.fbView=function(){TAB='feedback';nav();clearTimer();const k=[['idea','💡',tr('Idea','فكرة')],['bug','🐞',tr('Problem','مشكلة')],['opinion','💬',tr('Opinion','رأي')]];
+ stage(`<div class="card"><h3>💬 HOG Feedback / Notes</h3><p class="mut">${tr('Tell us what you think. Every note reaches the HOG team.','قل لنا رأيك. كل ملاحظة تصل لفريق HOG.')}</p>
+ <div class="fbk">${k.map(x=>`<button class="btn alt sm ${FB.kind===x[0]?'on':''}" onclick="FB.kind='${x[0]}';fbView()">${x[1]} ${x[2]}</button>`).join('')}</div>
+ <div class="fbs" id="fbs">${[1,2,3,4,5].map(i=>`<span class="${i<=FB.stars?'on':''}" onclick="FB.stars=${i};document.querySelectorAll('#fbs span').forEach((e,j)=>e.classList.toggle('on',j<${i}))">★</span>`).join('')}</div>
+ <textarea id="fbtxt" class="inp" maxlength="2000" placeholder="${tr('Write your note here…','اكتب ملاحظتك هنا…')}"></textarea>
+ <button class="btn" style="width:100%;margin-top:8px" onclick="fbSend()">📨 ${tr('Send','إرسال')}</button></div>`)};
+window.fbSend=async function(){const t=($('#fbtxt').value||'').trim();if(t.length<3)return toast(tr('Please write a little more','اكتب ملاحظة أطول قليلًا'));
+ if(Date.now()-(+_jp('ga_fblast',0))<20000)return toast(tr('Please wait a few seconds','انتظر ثوانٍ قليلة'));
+ const row={kind:FB.kind,stars:FB.stars||null,body:t.slice(0,2000),lang:UI,email:SB.user?SB.user.email:null};_sp('ga_fblast',Date.now());
+ const ok=await fbPost(row);if(!ok){const q=_jp('ga_fbq',[]);q.push(row);_sp('ga_fbq',q.slice(-20))}
+ FB.stars=0;stage(`<div class="card" style="text-align:center"><div class="big">💜</div><h3>${tr('Thank you!','شكرًا لك!')}</h3><p class="mut">${ok?tr('Your note reached us.','وصلتنا ملاحظتك.'):tr('Saved on your device; it will be sent when you are online.','حُفظت على جهازك وسترسل عند الاتصال.')}</p><button class="btn alt" onclick="fbView()">${tr('Write another','اكتب أخرى')}</button></div>`)};
+async function fbPost(row){if(!fbSb())return false;try{const r=await SB.api('/rest/v1/feedback',{method:'POST',headers:SB.H({Prefer:'return=minimal'}),body:JSON.stringify(row)});return !!r.ok}catch(e){return false}}
+async function fbFlush(){const q=_jp('ga_fbq',[]);if(!q.length||!fbSb())return;const rest=[];for(const r of q){if(!(await fbPost(r)))rest.push(r)}_sp('ga_fbq',rest)}
+/* owner inbox */
+window.FBU=+(_jp('ga_fbu',0));
+async function fbOwnerCheck(){if(!SB.owner||!fbSb())return;try{const r=await SB.api('/rest/v1/feedback?select=id&read=eq.false',{headers:SB.H()});if(r.ok&&Array.isArray(r.j)){const n=r.j.length;const seen=+(_jp('ga_fbseen',0));window.FBU=n;_sp('ga_fbu',n);if(n>seen)notify(tr('New feedback','ملاحظات جديدة'),n+' '+tr('unread notes in HOG Feedback','ملاحظة غير مقروءة'));_sp('ga_fbseen',n);nav()}}catch(e){}}
+window.inboxView=async function(){TAB='inbox';nav();clearTimer();if(!SB.owner)return fbView();stage(`<div class="card"><div class="spin"></div></div>`);
+ let rows=[];try{const r=await SB.api('/rest/v1/feedback?select=*&order=created_at.desc&limit=100',{headers:SB.H()});if(r.ok&&Array.isArray(r.j))rows=r.j}catch(e){}
+ const ic={idea:'💡',bug:'🐞',opinion:'💬'};
+ stage(`<div class="card"><h3>📥 ${tr('Feedback inbox','صندوق الملاحظات')} <span class="tag p">${rows.filter(x=>!x.read).length}/${rows.length}</span></h3><div class="row"><button class="btn alt sm" onclick="inboxAll()">✔ ${tr('Mark all read','تعليم الكل كمقروء')}</button><button class="btn alt sm" onclick="inboxView()">🔄</button></div></div>
+ ${rows.length?rows.map(x=>`<div class="fbi ${x.read?'':'unread'}"><b>${ic[x.kind]||'💬'} ${x.stars?'★'.repeat(x.stars):''}</b><div style="white-space:pre-wrap;margin-top:4px">${esc(x.body||'')}</div><small>${esc(x.email||tr('Guest','زائر'))} · ${esc(x.lang||'')} · ${new Date(x.created_at).toLocaleString()}</small>${x.read?'':`<button class="btn alt sm" style="margin-top:6px" onclick="inboxRead('${x.id}')">✔ ${tr('Read','مقروء')}</button>`}</div>`).join(''):`<div class="card"><p class="mut">${tr('No notes yet.','لا ملاحظات بعد.')}</p></div>`}`);
+ window.FBU=rows.filter(x=>!x.read).length;_sp('ga_fbu',FBU);_sp('ga_fbseen',FBU);nav()};
+window.inboxRead=async id=>{try{await SB.api('/rest/v1/feedback?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:SB.H({Prefer:'return=minimal'}),body:JSON.stringify({read:true})})}catch(e){}inboxView()};
+window.inboxAll=async()=>{try{await SB.api('/rest/v1/feedback?read=eq.false',{method:'PATCH',headers:SB.H({Prefer:'return=minimal'}),body:JSON.stringify({read:true})})}catch(e){}inboxView()};
+{const _al=SB.afterLogin;SB.afterLogin=async()=>{await _al();fbFlush();fbOwnerCheck()}}
+setTimeout(()=>{fbFlush();fbOwnerCheck()},5000);
+
+/* ---------- local reminders (work when the app is open / installed; no server push) ---------- */
+function remCheck(){if(!_jp('ga_rem',false))return;const now=Date.now(),last=+_jp('ga_remlast',0);if(now-last<20*36e5)return;
+  const cp=_jp('ga_calm',{});const msgs=[[tr('Time for a challenge','وقت التحدي'),tr('A quick HOG Arena game is waiting for you.','لعبة سريعة في ساحة HOG بانتظارك.')],[tr('Missed you!','اشتقنا لك!'),tr('Beat your best score today.','تحدَّ أفضل نتيجة لك اليوم.')]];
+  const m=msgs[Math.floor(now/864e5)%msgs.length];_sp('ga_remlast',now);notify(m[0],m[1])}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)remCheck()});setTimeout(remCheck,6000);
+{const _no=window.notesOpen;window.notesOpen=function(){_no();const pn=document.querySelector('#nts .pn');if(!pn)return;const on=_jp('ga_rem',false);const d=document.createElement('div');d.className='nt';
+  d.innerHTML=`<b>⏰ ${tr('Daily reminder','تذكير يومي')}</b> <button class="btn alt sm" id="remtg">${on?tr('On','يعمل'):tr('Off','متوقف')}</button><small>${tr('Shown when you open the app; allow alerts to see it outside the app.','يظهر عند فتح التطبيق؛ اسمح بالتنبيهات ليظهر خارجه.')}</small>`;
+  pn.insertBefore(d,pn.children[1]||null);d.querySelector('#remtg').onclick=()=>{const v=!_jp('ga_rem',false);_sp('ga_rem',v);if(v&&window.Notification&&Notification.permission==='default')permGate('notif',()=>Notification.requestPermission());notesOpen()}}}
 </script>
 </body>
 </html>
