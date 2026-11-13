@@ -1,0 +1,33 @@
+{
+  "name": "HOG Gamify Anything",
+  "short_name": "HOG Gamify",
+  "description": "Turn any idea or file into a 2-player competition game. حوّل أي فكرة أو ملف إلى لعبة منافسة.",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#060a17",
+  "theme_color": "#060a17",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "hog-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "hog-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "hog-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

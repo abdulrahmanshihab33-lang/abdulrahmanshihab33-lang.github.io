@@ -1,0 +1,2461 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>HOG Cross Math — Hall of Games</title>
+  <style>
+    /* ==========================================================================
+       1. DESIGN TOKENS & THEMES (PARCHMENT PAPER vs. HOG DARK ARENA)
+       ========================================================================== */
+    :root {
+      --bg-app: #e7cfa8;
+      --bg-pattern: radial-gradient(circle at 20% 20%, rgba(255, 245, 224, 0.55), rgba(212, 176, 122, 0.45));
+      --surface-card: rgba(252, 244, 228, 0.92);
+      --surface-elevated: #fff9ed;
+      --surface-slot: #efe0c4;
+      --surface-slot-hover: #e5cfa8;
+      --surface-tile: linear-gradient(180deg, #fffdf8 0%, #f1dfc0 100%);
+      --surface-tile-fixed: linear-gradient(180deg, #e5d1ae 0%, #d3ba90 100%);
+      --surface-op: rgba(120, 82, 42, 0.12);
+      --border-main: #7d5832;
+      --border-subtle: rgba(125, 88, 50, 0.28);
+      --text-primary: #2f1e0e;
+      --text-secondary: #68492a;
+      --text-muted: #8c6a47;
+      --accent-primary: #c8641e;
+      --accent-primary-hover: #a84f12;
+      --accent-secondary: #2a7b5c;
+      --accent-gold: #d99b16;
+      --status-valid: #1f8a5b;
+      --status-valid-bg: rgba(31, 138, 91, 0.18);
+      --status-error: #c93b2b;
+      --status-error-bg: rgba(201, 59, 43, 0.16);
+      --shadow-tile: 0 3px 0 #8a643c, 0 5px 10px rgba(47, 30, 14, 0.18);
+      --shadow-card: 0 12px 32px rgba(47, 30, 14, 0.18);
+      --font-main: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body.theme-dark {
+      --bg-app: #0f172a;
+      --bg-pattern: radial-gradient(circle at 50% 0%, #1e293b 0%, #090d16 100%);
+      --surface-card: rgba(30, 41, 59, 0.92);
+      --surface-elevated: #263349;
+      --surface-slot: #162033;
+      --surface-slot-hover: #243452;
+      --surface-tile: linear-gradient(180deg, #384966 0%, #243147 100%);
+      --surface-tile-fixed: linear-gradient(180deg, #1d283a 0%, #141c29 100%);
+      --surface-op: rgba(148, 163, 184, 0.14);
+      --border-main: #64748b;
+      --border-subtle: rgba(148, 163, 184, 0.25);
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --accent-primary: #f59e0b;
+      --accent-primary-hover: #d97706;
+      --accent-secondary: #10b981;
+      --accent-gold: #fbbf24;
+      --status-valid: #10b981;
+      --status-valid-bg: rgba(16, 185, 129, 0.2);
+      --status-error: #f43f5e;
+      --status-error-bg: rgba(244, 63, 94, 0.2);
+      --shadow-tile: 0 3px 0 #0b1120, 0 5px 12px rgba(0, 0, 0, 0.45);
+      --shadow-card: 0 14px 36px rgba(0, 0, 0, 0.5);
+    }
+
+    /* ==========================================================================
+       2. RESET & BASE LAYOUT
+       ========================================================================== */
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      min-height: 100dvh;
+      font-family: var(--font-main);
+      background-color: var(--bg-app);
+      background-image: var(--bg-pattern);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 780px;
+      min-height: 100dvh;
+      margin: 0 auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    /* Decorative subtle maple/geometric watermark for parchment feel */
+    .bg-watermark {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.08;
+      z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M60 15 L68 38 L92 32 L78 52 L98 66 L73 70 L78 94 L60 78 L42 94 L47 70 L22 66 L42 52 L28 32 L52 38 Z' fill='none' stroke='%235c3d1e' stroke-width='2'/%3E%3C/svg%3E");
+    }
+
+    body.theme-dark .bg-watermark {
+      opacity: 0.05;
+      background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='40' cy='40' r='28' fill='none' stroke='%2394a3b8' stroke-width='1.5' stroke-dasharray='4 4'/%3E%3C/svg%3E");
+    }
+
+    .screen {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* ==========================================================================
+       3. SETTINGS / LAUNCH SCREEN
+       ========================================================================== */
+    .settings-card {
+      background: var(--surface-card);
+      border: 2px solid var(--border-main);
+      border-radius: 24px;
+      padding: 20px 18px;
+      box-shadow: var(--shadow-card);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin: auto 0;
+    }
+
+    .brand-header {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: var(--accent-primary);
+      color: #ffffff;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: clamp(1.75rem, 5vw, 2.4rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .brand-subtitle {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    @media (min-width: 600px) {
+      .option-grid.four-cols {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .choice-btn {
+      background: var(--surface-elevated);
+      border: 2px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 12px 10px;
+      text-align: start;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      color: var(--text-primary);
+      position: relative;
+    }
+
+    .choice-btn:hover {
+      border-color: var(--accent-primary);
+      transform: translateY(-1px);
+    }
+
+    .choice-btn.active {
+      border-color: var(--accent-primary);
+      background: linear-gradient(180deg, rgba(200, 100, 30, 0.14), rgba(200, 100, 30, 0.05));
+      box-shadow: 0 0 0 2px rgba(200, 100, 30, 0.25);
+    }
+
+    body.theme-dark .choice-btn.active {
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.22), rgba(245, 158, 11, 0.08));
+      box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.28);
+    }
+
+    .choice-title {
+      font-weight: 800;
+      font-size: 0.92rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .choice-desc {
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+      line-height: 1.3;
+    }
+
+    .timer-pill {
+      display: inline-block;
+      font-size: 0.66rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(201, 59, 43, 0.14);
+      color: var(--status-error);
+      margin-top: 2px;
+      width: fit-content;
+    }
+
+    .timer-pill.relaxed {
+      background: rgba(31, 138, 91, 0.15);
+      color: var(--status-valid);
+    }
+
+    .toggles-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .toggle-chip {
+      background: var(--surface-elevated);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 10px 8px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      transition: all 0.15s ease;
+    }
+
+    .toggle-chip:hover {
+      border-color: var(--accent-primary);
+    }
+
+    .toggle-chip .icon {
+      font-size: 1.15rem;
+    }
+
+    .cta-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 16px 20px;
+      border: none;
+      border-radius: 18px;
+      background: linear-gradient(180deg, var(--accent-primary) 0%, var(--accent-primary-hover) 100%);
+      color: #ffffff;
+      font-size: 1.12rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      box-shadow: 0 5px 0 rgba(0, 0, 0, 0.25), 0 10px 20px rgba(200, 100, 30, 0.3);
+      transition: transform 0.12s ease, filter 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(2px);
+    }
+
+    .btn-secondary-outline {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      border: 1.5px dashed var(--border-main);
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-secondary-outline:hover {
+      background: var(--surface-elevated);
+      color: var(--text-primary);
+    }
+
+    /* ==========================================================================
+       4. GAMEPLAY SCREEN & TOP HUD
+       ========================================================================== */
+    .game-hud {
+      background: var(--surface-card);
+      border: 2px solid var(--border-main);
+      border-radius: 18px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+
+    .hud-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hud-badge {
+      background: var(--surface-elevated);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 6px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 64px;
+    }
+
+    .hud-label {
+      font-size: 0.62rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .hud-value {
+      font-size: 0.98rem;
+      font-weight: 900;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .hud-timer.warning {
+      border-color: var(--status-error);
+      background: var(--status-error-bg);
+      animation: pulseWarning 0.8s infinite alternate;
+    }
+
+    .hud-timer.warning .hud-value {
+      color: var(--status-error);
+    }
+
+    @keyframes pulseWarning {
+      from { transform: scale(1); }
+      to { transform: scale(1.05); }
+    }
+
+    .hud-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border-main);
+      background: var(--surface-elevated);
+      color: var(--text-primary);
+      font-size: 1.1rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.14s ease;
+      position: relative;
+    }
+
+    .icon-btn:hover {
+      background: var(--accent-primary);
+      color: #ffffff;
+      border-color: var(--accent-primary);
+    }
+
+    .icon-btn .hint-count {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: var(--accent-secondary);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 900;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ==========================================================================
+       5. PUZZLE BOARD AREA
+       ========================================================================== */
+    .board-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 4px;
+      min-height: 280px;
+      position: relative;
+    }
+
+    .mode-banner {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--text-secondary);
+      background: var(--surface-card);
+      border: 1.5px solid var(--border-subtle);
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .grid-container {
+      background: var(--surface-card);
+      border: 2.5px solid var(--border-main);
+      border-radius: 22px;
+      padding: 14px;
+      box-shadow: var(--shadow-card);
+      display: grid;
+      gap: var(--grid-gap, 6px);
+      justify-content: center;
+      align-items: center;
+      max-width: 100%;
+      transition: filter 0.2s ease;
+    }
+
+    .grid-container.blurred {
+      filter: blur(14px);
+      pointer-events: none;
+    }
+
+    .cell {
+      width: var(--cell-size, 52px);
+      height: var(--cell-size, 52px);
+      border-radius: var(--cell-radius, 12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: var(--cell-font, 1.25rem);
+      font-variant-numeric: tabular-nums;
+      position: relative;
+      transition: transform 0.14s ease, background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    /* Classic 3x3 circular nodes like Reference Image 1 */
+    .mode-classic .cell.cell-num,
+    .mode-classic .cell.cell-slot {
+      border-radius: 50%;
+    }
+
+    .cell.cell-empty {
+      background: transparent;
+      pointer-events: none;
+    }
+
+    .cell.cell-op {
+      background: var(--surface-op);
+      color: var(--text-primary);
+      font-size: calc(var(--cell-font, 1.25rem) * 1.05);
+      border: 1px solid transparent;
+    }
+
+    .cell.cell-fixed {
+      background: var(--surface-tile-fixed);
+      border: 2px solid var(--border-main);
+      color: var(--text-primary);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+
+    .cell.cell-slot {
+      background: var(--surface-slot);
+      border: 2.5px dashed var(--border-main);
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+
+    .cell.cell-slot:hover {
+      background: var(--surface-slot-hover);
+    }
+
+    .cell.cell-slot.selected-slot {
+      border-style: solid;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(200, 100, 30, 0.35);
+      transform: scale(1.05);
+    }
+
+    .cell.cell-slot.filled {
+      background: var(--surface-tile);
+      border: 2.5px solid var(--accent-primary);
+      box-shadow: var(--shadow-tile);
+    }
+
+    .cell.valid-eq {
+      border-color: var(--status-valid) !important;
+      background-color: var(--status-valid-bg) !important;
+      color: var(--status-valid) !important;
+    }
+
+    .cell.invalid-eq {
+      border-color: var(--status-error) !important;
+      background-color: var(--status-error-bg) !important;
+      animation: shakeCell 0.32s ease;
+    }
+
+    @keyframes shakeCell {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+
+    /* Target Sum Special Prompt Banner (like Reference Image 3) */
+    .target-prompt-box {
+      text-align: center;
+      margin-bottom: 14px;
+      padding: 10px 16px;
+      border-radius: 16px;
+      background: var(--surface-elevated);
+      border: 1.5px solid var(--border-subtle);
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    /* ==========================================================================
+       6. NUMBER TILE BANK
+       ========================================================================== */
+    .bank-panel {
+      background: var(--surface-card);
+      border: 2px solid var(--border-main);
+      border-radius: 20px;
+      padding: 12px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .bank-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--text-secondary);
+    }
+
+    .tile-bank {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      min-height: 54px;
+    }
+
+    .bank-tile {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: var(--surface-tile);
+      border: 2px solid var(--border-main);
+      box-shadow: var(--shadow-tile);
+      color: var(--text-primary);
+      font-size: 1.25rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.15s ease;
+      touch-action: manipulation;
+    }
+
+    .bank-tile:hover:not(.used) {
+      transform: translateY(-2px);
+      border-color: var(--accent-primary);
+    }
+
+    .bank-tile.selected {
+      border-color: var(--accent-primary);
+      background: var(--accent-primary);
+      color: #ffffff;
+      transform: translateY(-3px) scale(1.06);
+      box-shadow: 0 6px 14px rgba(200, 100, 30, 0.35);
+    }
+
+    .bank-tile.used {
+      opacity: 0.25;
+      pointer-events: none;
+      transform: scale(0.92);
+      box-shadow: none;
+    }
+
+    /* ==========================================================================
+       7. MODALS (PAUSE, STAGE COMPLETE, TIME'S UP)
+       ========================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.68);
+      backdrop-filter: blur(6px);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--surface-elevated);
+      border: 2.5px solid var(--border-main);
+      border-radius: 24px;
+      padding: 24px 20px;
+      text-align: center;
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      animation: popIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-emoji {
+      font-size: 2.8rem;
+      line-height: 1;
+    }
+
+    .modal-title {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--text-primary);
+    }
+
+    .modal-text {
+      margin: 0;
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .stats-summary {
+      background: var(--surface-slot);
+      border-radius: 16px;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .stat-box {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stat-box span:first-child {
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .stat-box span:last-child {
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: var(--text-primary);
+    }
+
+    .modal-btn-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .btn-modal {
+      padding: 13px 16px;
+      border-radius: 14px;
+      border: 2px solid var(--border-main);
+      background: var(--surface-card);
+      color: var(--text-primary);
+      font-size: 0.96rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.14s ease;
+    }
+
+    .btn-modal:hover {
+      border-color: var(--accent-primary);
+    }
+
+    .btn-modal.primary {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: #ffffff;
+    }
+
+    .toast-msg {
+      position: fixed;
+      bottom: 84px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b;
+      color: #f8fafc;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      z-index: 60;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .toast-msg.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-watermark"></div>
+
+  <div class="app-shell">
+    <!-- ======================================================================
+         SCREEN 1: SETTINGS & LAUNCH SCREEN
+         ====================================================================== -->
+    <section id="settingsScreen" class="screen">
+      <div class="settings-card">
+        <div class="brand-header">
+          <span class="brand-badge">🐗 HALL OF GAMES • GAMIFY ANYTHING</span>
+          <h1 class="brand-title" id="uiAppTitle">HOG Cross math</h1>
+          <p class="brand-subtitle" id="uiAppSubtitle">Arithmetic Crossword & Target Sum Brain Trainer</p>
+        </div>
+
+        <!-- Puzzle Mode Selector -->
+        <div>
+          <div class="section-label">
+            <span id="uiModeLabel">1. Select Puzzle Type</span>
+          </div>
+          <div class="option-grid" id="modeSelector">
+            <button type="button" class="choice-btn active" data-mode="mixed">
+              <span class="choice-title">🎯 <span data-i18n="modeMixed">Mixed Campaign</span></span>
+              <span class="choice-desc" data-i18n="modeMixedDesc">All 3 puzzle styles progressively across stages</span>
+            </button>
+            <button type="button" class="choice-btn" data-mode="classic">
+              <span class="choice-title">⭕ <span data-i18n="modeClassic">Classic 3×3 Grid</span></span>
+              <span class="choice-desc" data-i18n="modeClassicDesc">Intersecting horizontal & vertical equations</span>
+            </button>
+            <button type="button" class="choice-btn" data-mode="crossword">
+              <span class="choice-title">🧩 <span data-i18n="modeCrossword">Crossword Web</span></span>
+              <span class="choice-desc" data-i18n="modeCrosswordDesc">Multi-equation interlocking +, −, ×, ÷ grids</span>
+            </button>
+            <button type="button" class="choice-btn" data-mode="target">
+              <span class="choice-title">🎲 <span data-i18n="modeTarget">Target Sum</span></span>
+              <span class="choice-desc" data-i18n="modeTargetDesc">Pick 3–4 tiles from pool to hit exact target</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Difficulty Selector -->
+        <div>
+          <div class="section-label">
+            <span id="uiDiffLabel">2. Select Difficulty & Timer</span>
+          </div>
+          <div class="option-grid four-cols" id="diffSelector">
+            <button type="button" class="choice-btn active" data-diff="beginner">
+              <span class="choice-title" data-i18n="diffBeginner">Beginner</span>
+              <span class="choice-desc" data-i18n="diffBeginnerDesc">Numbers 1–15, + and −</span>
+              <span class="timer-pill relaxed" data-i18n="timerUntimed">Untimed</span>
+            </button>
+            <button type="button" class="choice-btn" data-diff="intermediate">
+              <span class="choice-title" data-i18n="diffInter">Intermediate</span>
+              <span class="choice-desc" data-i18n="diffInterDesc">+, −, ×, ÷ & distractors</span>
+              <span class="timer-pill relaxed" data-i18n="timerRelaxed">Relaxed</span>
+            </button>
+            <button type="button" class="choice-btn" data-diff="advanced">
+              <span class="choice-title" data-i18n="diffAdv">Advanced</span>
+              <span class="choice-desc" data-i18n="diffAdvDesc">Complex webs, larger numbers</span>
+              <span class="timer-pill" data-i18n="timer90">⏱ 90s Timer</span>
+            </button>
+            <button type="button" class="choice-btn" data-diff="expert">
+              <span class="choice-title" data-i18n="diffExpert">Expert</span>
+              <span class="choice-desc" data-i18n="diffExpertDesc">High-speed master challenges</span>
+              <span class="timer-pill" data-i18n="timer60">⏱ 60s Blitz</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Preferences Row -->
+        <div>
+          <div class="section-label">
+            <span id="uiPrefLabel">3. Preferences</span>
+          </div>
+          <div class="toggles-row">
+            <button type="button" class="toggle-chip" id="btnToggleTheme">
+              <span class="icon" id="themeIcon">📜</span>
+              <span id="themeText">Parchment</span>
+            </button>
+            <button type="button" class="toggle-chip" id="btnToggleSound">
+              <span class="icon" id="soundIcon">🔊</span>
+              <span id="soundText">Sound: ON</span>
+            </button>
+            <button type="button" class="toggle-chip" id="btnToggleLang">
+              <span class="icon">🌐</span>
+              <span id="langText">English</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Start & Offline Export -->
+        <div class="cta-row">
+          <button type="button" class="btn-primary" id="btnStartGame">
+            <span>▶</span>
+            <span id="uiStartBtn">START GAME</span>
+          </button>
+          <button type="button" class="btn-secondary-outline" id="btnDownloadOffline">
+            <span>💾</span>
+            <span id="uiDownloadBtn">Save Standalone Offline HTML</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SCREEN 2: ACTIVE GAMEPLAY SCREEN
+         ====================================================================== -->
+    <section id="gameScreen" class="screen hidden">
+      <!-- Top HUD -->
+      <header class="game-hud">
+        <div class="hud-group">
+          <div class="hud-badge">
+            <span class="hud-label" data-i18n="hudStage">STAGE</span>
+            <span class="hud-value" id="hudStageVal">1</span>
+          </div>
+          <div class="hud-badge">
+            <span class="hud-label" data-i18n="hudScore">SCORE</span>
+            <span class="hud-value" id="hudScoreVal">0</span>
+          </div>
+          <div class="hud-badge hud-timer" id="hudTimerBox">
+            <span class="hud-label" id="hudTimerLabel">TIME</span>
+            <span class="hud-value" id="hudTimerVal">∞</span>
+          </div>
+        </div>
+
+        <div class="hud-actions">
+          <button type="button" class="icon-btn" id="btnHint" title="Hint">
+            💡
+            <span class="hint-count" id="hintCountBadge">3</span>
+          </button>
+          <button type="button" class="icon-btn" id="btnClearBoard" title="Clear Board">
+            ↺
+          </button>
+          <button type="button" class="icon-btn" id="btnPause" title="Pause Game">
+            ⏸
+          </button>
+        </div>
+      </header>
+
+      <!-- Puzzle Grid Area -->
+      <main class="board-wrapper">
+        <div class="mode-banner" id="boardModeBanner">Classic 3×3 Crossmath</div>
+        <div id="targetPromptContainer" class="target-prompt-box hidden"></div>
+        <div id="puzzleGrid" class="grid-container"></div>
+      </main>
+
+      <!-- Bottom Number Tile Bank -->
+      <footer class="bank-panel">
+        <div class="bank-header">
+          <span id="bankInstruction">Tap a number tile, then tap an empty slot (or drag & drop)</span>
+          <span id="eqProgressText">0 / 0 Equations</span>
+        </div>
+        <div class="tile-bank" id="tileBank"></div>
+      </footer>
+    </section>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: PAUSE OVERLAY
+       ======================================================================== -->
+  <div id="pauseModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-emoji">⏸️</div>
+      <h2 class="modal-title" data-i18n="pauseTitle">Game Paused</h2>
+      <p class="modal-text" data-i18n="pauseDesc">Board hidden and timer frozen. Take a breather!</p>
+      <div class="modal-btn-stack">
+        <button type="button" class="btn-modal primary" id="btnResume" data-i18n="btnResume">▶ Resume Game</button>
+        <button type="button" class="btn-modal" id="btnRestartStage" data-i18n="btnRestart">↺ Restart Stage</button>
+        <button type="button" class="btn-modal" id="btnBackSettings" data-i18n="btnSettings">⚙ Back to Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: STAGE COMPLETE
+       ======================================================================== -->
+  <div id="winModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-emoji">🏆</div>
+      <h2 class="modal-title" data-i18n="winTitle">Stage Cleared!</h2>
+      <p class="modal-text" id="winSubtitle">Every equation verified 100% accurate!</p>
+      <div class="stats-summary">
+        <div class="stat-box">
+          <span data-i18n="statStage">Stage</span>
+          <span id="winStatStage">1</span>
+        </div>
+        <div class="stat-box">
+          <span data-i18n="statBonus">Time Bonus</span>
+          <span id="winStatBonus">+150</span>
+        </div>
+        <div class="stat-box">
+          <span data-i18n="statTotal">Total Score</span>
+          <span id="winStatTotal">450</span>
+        </div>
+      </div>
+      <div class="modal-btn-stack">
+        <button type="button" class="btn-modal primary" id="btnNextStage" data-i18n="btnNextStage">Next Stage ➔</button>
+        <button type="button" class="btn-modal" id="btnWinSettings" data-i18n="btnSettings">⚙ Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: TIME'S UP (ADVANCED / EXPERT)
+       ======================================================================== -->
+  <div id="timeoutModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-emoji">⏰</div>
+      <h2 class="modal-title" data-i18n="timeUpTitle">Time's Up!</h2>
+      <p class="modal-text" data-i18n="timeUpDesc">The countdown reached zero before all equations were solved.</p>
+      <div class="modal-btn-stack">
+        <button type="button" class="btn-modal primary" id="btnRetryTimeout" data-i18n="btnRetry">↺ Try Stage Again</button>
+        <button type="button" class="btn-modal" id="btnTimeoutSettings" data-i18n="btnSettings">⚙ Back to Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastMsg" class="toast-msg"></div>
+
+  <script>
+    /* ==========================================================================
+       HOG CROSS MATH — COMPLETE ENGINE & VERIFIED PUZZLE GENERATOR
+       ========================================================================== */
+
+    // --------------------------------------------------------------------------
+    // 1. LOCALIZATION DICTIONARY (ENGLISH & ARABIC)
+    // --------------------------------------------------------------------------
+    const I18N = {
+      en: {
+        appTitle: "HOG Cross Math",
+        appSubtitle: "Arithmetic Crossword & Target Sum Brain Trainer",
+        modeLabel: "1. Select Puzzle Type",
+        modeMixed: "Mixed Campaign",
+        modeMixedDesc: "All 3 puzzle styles progressively across stages",
+        modeClassic: "Classic 3×3 Grid",
+        modeClassicDesc: "Intersecting horizontal & vertical equations",
+        modeCrossword: "Crossword Web",
+        modeCrosswordDesc: "Multi-equation interlocking +, −, ×, ÷ grids",
+        modeTarget: "Target Sum",
+        modeTargetDesc: "Pick 3–4 tiles from pool to hit exact target",
+        diffLabel: "2. Select Difficulty & Timer",
+        diffBeginner: "Beginner",
+        diffBeginnerDesc: "Numbers 1–15, + and −",
+        diffInter: "Intermediate",
+        diffInterDesc: "+, −, ×, ÷ & distractors",
+        diffAdv: "Advanced",
+        diffAdvDesc: "Complex webs, larger numbers",
+        diffExpert: "Expert",
+        diffExpertDesc: "High-speed master challenges",
+        timerUntimed: "Untimed",
+        timerRelaxed: "Relaxed",
+        timer90: "⏱ 90s Timer",
+        timer60: "⏱ 60s Blitz",
+        prefLabel: "3. Preferences",
+        themeParchment: "Parchment",
+        themeDark: "Dark Arena",
+        soundOn: "Sound: ON",
+        soundOff: "Sound: OFF",
+        startBtn: "START GAME",
+        downloadBtn: "Save Standalone Offline HTML",
+        hudStage: "STAGE",
+        hudScore: "SCORE",
+        hudTime: "TIME",
+        bankHint: "Tap a tile, then tap an empty slot (or drag & drop)",
+        eqProgress: "{valid} / {total} Equations",
+        pauseTitle: "Game Paused",
+        pauseDesc: "Board hidden and timer frozen. Take a breather!",
+        btnResume: "▶ Resume Game",
+        btnRestart: "↺ Restart Stage",
+        btnSettings: "⚙ Back to Settings",
+        winTitle: "Stage Cleared!",
+        winSubtitle: "Every equation verified 100% accurate!",
+        statStage: "Stage",
+        statBonus: "Time Bonus",
+        statTotal: "Total Score",
+        btnNextStage: "Next Stage ➔",
+        timeUpTitle: "Time's Up!",
+        timeUpDesc: "The countdown reached zero before all equations were solved.",
+        btnRetry: "↺ Try Stage Again",
+        bannerClassic: "Classic 3×3 Crossmath Grid",
+        bannerCrossword: "Master Crossword Math Web",
+        bannerTarget: "Target Sum Equation Builder",
+        targetPrompt3: "Move 3 numbers so the result equals {target}",
+        targetPrompt4: "Move 4 numbers so the result equals {target}",
+        toastHintUsed: "Verified number placed!",
+        toastNoHints: "No hints remaining for this stage!",
+        toastCleared: "Board reset to starting tiles"
+      },
+      ar: {
+        appTitle: "HOG Cross Math",
+        appSubtitle: "لعبة الألغاز الحسابية المتقاطعة وتحدي الأرقام",
+        modeLabel: "١. اختر نمط اللغز",
+        modeMixed: "المغامرة الشاملة",
+        modeMixedDesc: "تدرج ذكي يجمع بين الأنماط الثلاثة",
+        modeClassic: "شبكة ٣×٣ الكلاسيكية",
+        modeClassicDesc: "معادلات أفقية وعمودية متقاطعة",
+        modeCrossword: "الكلمات المتقاطعة الحسابية",
+        modeCrosswordDesc: "شبكة معادلات متداخلة (+، −، ×، ÷)",
+        modeTarget: "مجموع الهدف",
+        modeTargetDesc: "حرّك الأرقام المناسبة للوصول إلى الناتج",
+        diffLabel: "٢. اختر مستوى الصعوبة والمؤقت",
+        diffBeginner: "مبتدئ",
+        diffBeginnerDesc: "أرقام ١–١٥، جمع وطرح فقط",
+        diffInter: "متوسط",
+        diffInterDesc: "جمع، طرح، ضرب، قسمة + أرقام إضافية",
+        diffAdv: "متقدم",
+        diffAdvDesc: "شبكات معقدة وأرقام كبيرة",
+        diffExpert: "خبير",
+        diffExpertDesc: "تحدي السرعة الفائقة للمحترفين",
+        timerUntimed: "بدون مؤقت",
+        timerRelaxed: "مريح",
+        timer90: "⏱ مؤقت ٩٠ ثانية",
+        timer60: "⏱ تحدي ٦٠ ثانية",
+        prefLabel: "٣. الإعدادات",
+        themeParchment: "ورق كلاسيكي",
+        themeDark: "الوضع الليلي",
+        soundOn: "الصوت: يعمل",
+        soundOff: "الصوت: مكتوم",
+        startBtn: "ابدأ اللعب",
+        downloadBtn: "حفظ اللعبة للعمل بدون إنترنت",
+        hudStage: "المرحلة",
+        hudScore: "النقاط",
+        hudTime: "الوقت",
+        bankHint: "اضغط على الرقم ثم اضغط على الخانة الفارغة",
+        eqProgress: "{valid} / {total} معادلات",
+        pauseTitle: "اللعبة متوقفة مؤقتاً",
+        pauseDesc: "تم إخفاء اللوحة وإيقاف المؤقت مؤقتاً.",
+        btnResume: "▶ استئناف اللعب",
+        btnRestart: "↺ إعادة المرحلة",
+        btnSettings: "⚙ العودة للإعدادات",
+        winTitle: "أحسنت! اكتملت المرحلة",
+        winSubtitle: "تم التحقق من صحة جميع المعادلات بنسبة ١٠٠٪!",
+        statStage: "المرحلة",
+        statBonus: "مكافأة الوقت",
+        statTotal: "مجموع النقاط",
+        btnNextStage: "المرحلة التالية ➔",
+        timeUpTitle: "انتهى الوقت!",
+        timeUpDesc: "انتهى العد التنازلي قبل إكمال جميع المعادلات.",
+        btnRetry: "↺ أعد المحاولة",
+        bannerClassic: "شبكة ٣×٣ الحسابية المتقاطعة",
+        bannerCrossword: "شبكة المعادلات المتداخلة",
+        bannerTarget: "بناء معادلة الناتج المستهدف",
+        targetPrompt3: "حرّك ثلاثة أرقام بحيث يصبح الناتج يساوي {target}",
+        targetPrompt4: "حرّك أربعة أرقام بحيث يصبح الناتج يساوي {target}",
+        toastHintUsed: "تم وضع رقم صحيح!",
+        toastNoHints: "لا توجد تلميحات متبقية في هذه المرحلة!",
+        toastCleared: "تمت إعادة تعيين اللوحة"
+      }
+    };
+
+    // --------------------------------------------------------------------------
+    // 2. WEB AUDIO API SOUND SYNTHESIZER (ZERO EXTERNAL ASSETS)
+    // --------------------------------------------------------------------------
+    class SoundEngine {
+      constructor() {
+        this.enabled = true;
+        this.ctx = null;
+      }
+
+      init() {
+        if (!this.ctx && (window.AudioContext || window.webkitAudioContext)) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (this.ctx && this.ctx.state === "suspended") {
+          this.ctx.resume();
+        }
+      }
+
+      playTone(freq, type = "sine", duration = 0.12, gainVal = 0.14, delay = 0) {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime + delay;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+
+        gain.gain.setValueAtTime(gainVal, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration);
+      }
+
+      selectTile() {
+        this.playTone(520, "triangle", 0.08, 0.12);
+      }
+
+      placeTile() {
+        this.playTone(660, "sine", 0.1, 0.15);
+      }
+
+      removeTile() {
+        this.playTone(380, "sine", 0.09, 0.1);
+      }
+
+      equationValid() {
+        this.playTone(587.33, "triangle", 0.12, 0.14, 0);
+        this.playTone(880, "triangle", 0.18, 0.14, 0.08);
+      }
+
+      equationInvalid() {
+        this.playTone(190, "sawtooth", 0.16, 0.1, 0);
+        this.playTone(155, "sawtooth", 0.2, 0.1, 0.1);
+      }
+
+      stageWin() {
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((n, idx) => this.playTone(n, "triangle", 0.25, 0.16, idx * 0.11));
+      }
+    }
+
+    const sfx = new SoundEngine();
+
+    // --------------------------------------------------------------------------
+    // 3. STRICT ARITHMETIC EVALUATION & VERIFICATION ENGINE
+    // --------------------------------------------------------------------------
+    function evalOp(a, op, b) {
+      if (a === null || b === null || a === undefined || b === undefined) return null;
+      switch (op) {
+        case "+": return a + b;
+        case "-": return a - b;
+        case "×":
+        case "*": return a * b;
+        case "÷":
+        case "/":
+          if (b === 0 || a % b !== 0) return null;
+          return a / b;
+        default:
+          return null;
+      }
+    }
+
+    /**
+     * Evaluates a multi-term equation left-to-right or standard arithmetic
+     * For 3-operand Target Sum: [n0, op0, n1, op1, n2, '=', res]
+     * Supports standard operator precedence (×, ÷ before +, −)
+     */
+    function evaluateEquationTokens(nums, ops, targetResult) {
+      if (nums.some(n => n === null || n === undefined || Number.isNaN(n))) {
+        return { complete: false, valid: false };
+      }
+      if (targetResult === null || targetResult === undefined) {
+        return { complete: false, valid: false };
+      }
+
+      // First pass: × and ÷
+      let reducedNums = [nums[0]];
+      let reducedOps = [];
+
+      for (let i = 0; i < ops.length; i++) {
+        const op = ops[i];
+        const nextNum = nums[i + 1];
+        if (op === "×" || op === "÷") {
+          const prev = reducedNums.pop();
+          const res = evalOp(prev, op, nextNum);
+          if (res === null) return { complete: true, valid: false };
+          reducedNums.push(res);
+        } else {
+          reducedOps.push(op);
+          reducedNums.push(nextNum);
+        }
+      }
+
+      // Second pass: + and -
+      let acc = reducedNums[0];
+      for (let i = 0; i < reducedOps.length; i++) {
+        acc = evalOp(acc, reducedOps[i], reducedNums[i + 1]);
+        if (acc === null) return { complete: true, valid: false };
+      }
+
+      return {
+        complete: true,
+        valid: acc === targetResult
+      };
+    }
+
+    /**
+     * Strict Puzzle Blueprint Verifier:
+     * Ensures EVERY number is a positive integer, EVERY equation evaluates accurately,
+     * and the tile bank contains exact matching solution tiles.
+     */
+    function verifyPuzzleBlueprint(puzzle) {
+      if (!puzzle || !puzzle.cells || !puzzle.equations || puzzle.equations.length === 0) {
+        return false;
+      }
+
+      const cellMap = new Map();
+      for (const c of puzzle.cells) {
+        if (c.type === "num" || c.type === "slot") {
+          if (!Number.isInteger(c.solution) || c.solution <= 0) {
+            return false;
+          }
+        }
+        cellMap.set(`${c.r},${c.c}`, c);
+      }
+
+      // Verify every single equation using ground-truth solutions
+      for (const eq of puzzle.equations) {
+        const operandVals = eq.operands.map(coord => {
+          const cell = cellMap.get(`${coord.r},${coord.c}`);
+          return cell ? cell.solution : null;
+        });
+        const resultCell = cellMap.get(`${eq.result.r},${eq.result.c}`);
+        const targetVal = resultCell ? resultCell.solution : null;
+
+        const check = evaluateEquationTokens(operandVals, eq.operators, targetVal);
+        if (!check.complete || !check.valid) {
+          return false;
+        }
+      }
+
+      // Verify tile bank contains every required slot solution
+      const requiredSolutions = puzzle.cells
+        .filter(c => c.type === "slot")
+        .map(c => c.solution)
+        .sort((a, b) => a - b);
+
+      const bankCopy = [...puzzle.bank].sort((a, b) => a - b);
+      for (const req of requiredSolutions) {
+        const idx = bankCopy.indexOf(req);
+        if (idx === -1) return false;
+        bankCopy.splice(idx, 1);
+      }
+
+      return requiredSolutions.length > 0;
+    }
+
+    // --------------------------------------------------------------------------
+    // 4. PROCEDURAL & CURATED PUZZLE GENERATORS (3 MODES)
+    // --------------------------------------------------------------------------
+    function randInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    /**
+     * MODE 1: CLASSIC 3x3 CROSSMATH GRID (Like Reference Image 1)
+     * 5x5 layout:
+     * [N00] [op] [N02] [=] [N04]
+     * [op]  [  ] [op]  [ ] [op]
+     * [N20] [op] [N22] [=] [N24]
+     * [=]   [  ] [=]   [ ] [=]
+     * [N40] [op] [N42] [=] [N44]
+     */
+    function generateClassic3x3(difficulty, stage) {
+      const maxBase = difficulty === "beginner" ? 12 : difficulty === "intermediate" ? 20 : 35;
+
+      for (let attempt = 0; attempt < 250; attempt++) {
+        // Choose valid positive numbers for 3x3 arithmetic square:
+        // Row 1: A + B = C
+        // Row 2: D - E = F  (or +)
+        // Row 3: G + H = I
+        // Col 1: A - D = G  (or +)
+        // Col 2: B + E = H
+        // Col 3: C - F = I  (or +)
+        const useMixedSigns = difficulty !== "beginner";
+        const r1Op = "+";
+        const r2Op = useMixedSigns && Math.random() < 0.6 ? "-" : "+";
+        const r3Op = "+";
+        const c1Op = useMixedSigns && Math.random() < 0.65 ? "-" : "+";
+        const c2Op = "+";
+        // Note: For (A + B) op3 (D r2Op E) = (A c1Op D) + (B + E):
+        // If c1Op is '-', r2Op is '-', and c3Op is '-':
+        // (A + B) - (D - E) = A + B - D + E = (A - D) + (B + E) -> Always holds!
+        // If c1Op is '+', r2Op is '+', and c3Op is '+':
+        // (A + B) + (D + E) = (A + D) + (B + E) -> Always holds!
+        const coupledMinus = Math.random() < 0.65;
+        const opR2 = coupledMinus ? "-" : "+";
+        const opC1 = coupledMinus ? "-" : "+";
+        const opC3 = coupledMinus ? "-" : "+";
+
+        const D = randInt(2, Math.floor(maxBase * 0.7));
+        const E = coupledMinus ? randInt(1, D - 1) : randInt(1, Math.floor(maxBase * 0.6));
+        const F = coupledMinus ? D - E : D + E;
+
+        const A = coupledMinus ? randInt(D + 1, maxBase + D) : randInt(2, maxBase);
+        const B = randInt(2, maxBase);
+        const C = A + B;
+
+        const G = coupledMinus ? A - D : A + D;
+        const H = B + E;
+        const I = coupledMinus ? C - F : C + F;
+
+        const nums = [A, B, C, D, E, F, G, H, I];
+        if (nums.some(n => n <= 0 || n > 99)) continue;
+
+        // Determine how many cells to hide (5 to 7 blanks out of 9)
+        const blankCount = difficulty === "beginner" ? 5 : difficulty === "intermediate" ? 6 : 7;
+        const allIndices = shuffleArray([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+        const hiddenSet = new Set(allIndices.slice(0, blankCount));
+
+        // On Stage 1 Beginner, mimic Image 1's iconic pattern (8, 10, 3, 5 revealed)
+        if (stage === 1 && difficulty === "beginner" && attempt === 0) {
+          // Exact Reference Image 1 Verification:
+          // Row 1: 8 + [2] = 10
+          // Row 2: [6] - 3 = [3]
+          // Row 3: [2] + [5] = 7 (or if C3 is -, 10 - 3 = 7; in Image 1 bottom right is 5, wait: 8 - 3 = 5? If 8 - 3 = 5, 5 + 5 = 10 -> 10 - 5 = 5!)
+          // Let's verify: A=8, B=2, C=10 | D=3, E=3, F=0 (not positive) -> So A=8, B=2, C=10, D=4, E=3, F=1 -> G=4, H=5, I=9.
+        }
+
+        const gridCoords = [
+          { r: 0, c: 0, val: A }, { r: 0, c: 2, val: B }, { r: 0, c: 4, val: C },
+          { r: 2, c: 0, val: D }, { r: 2, c: 2, val: E }, { r: 2, c: 4, val: F },
+          { r: 4, c: 0, val: G }, { r: 4, c: 2, val: H }, { r: 4, c: 4, val: I }
+        ];
+
+        const cells = [];
+        const bank = [];
+
+        gridCoords.forEach((item, idx) => {
+          const isHidden = hiddenSet.has(idx);
+          if (isHidden) bank.push(item.val);
+          cells.push({
+            r: item.r,
+            c: item.c,
+            type: isHidden ? "slot" : "num",
+            solution: item.val,
+            value: isHidden ? null : item.val
+          });
+        });
+
+        // Operators
+        const ops = [
+          { r: 0, c: 1, text: r1Op }, { r: 0, c: 3, text: "=" },
+          { r: 1, c: 0, text: opC1 }, { r: 1, c: 2, text: c2Op }, { r: 1, c: 4, text: opC3 },
+          { r: 2, c: 1, text: opR2 }, { r: 2, c: 3, text: "=" },
+          { r: 3, c: 0, text: "=" },  { r: 3, c: 2, text: "=" },  { r: 3, c: 4, text: "=" },
+          { r: 4, c: 1, text: r3Op }, { r: 4, c: 3, text: "=" }
+        ];
+        ops.forEach(o => cells.push({ r: o.r, c: o.c, type: "op", text: o.text }));
+
+        // Add distractors in Advanced/Expert
+        if (difficulty === "advanced" || difficulty === "expert") {
+          bank.push(randInt(1, maxBase));
+          if (difficulty === "expert") bank.push(randInt(1, maxBase));
+        }
+
+        const equations = [
+          { id: "r1", operands: [{ r: 0, c: 0 }, { r: 0, c: 2 }], operators: [r1Op], result: { r: 0, c: 4 } },
+          { id: "r2", operands: [{ r: 2, c: 0 }, { r: 2, c: 2 }], operators: [opR2], result: { r: 2, c: 4 } },
+          { id: "r3", operands: [{ r: 4, c: 0 }, { r: 4, c: 2 }], operators: [r3Op], result: { r: 4, c: 4 } },
+          { id: "c1", operands: [{ r: 0, c: 0 }, { r: 2, c: 0 }], operators: [opC1], result: { r: 4, c: 0 } },
+          { id: "c2", operands: [{ r: 0, c: 2 }, { r: 2, c: 2 }], operators: [c2Op], result: { r: 4, c: 2 } },
+          { id: "c3", operands: [{ r: 0, c: 4 }, { r: 2, c: 4 }], operators: [opC3], result: { r: 4, c: 4 } }
+        ];
+
+        const puzzle = {
+          mode: "classic",
+          rows: 5,
+          cols: 5,
+          cells,
+          equations,
+          bank: shuffleArray(bank)
+        };
+
+        if (verifyPuzzleBlueprint(puzzle)) return puzzle;
+      }
+      return null;
+    }
+
+    /**
+     * MODE 2: MASTER CROSSWORD MATH GRID (Like Reference Image 2)
+     * Interlocking horizontal & vertical equations with +, -, ×, ÷
+     */
+    function generateCrosswordWeb(difficulty, stage) {
+      // Curated verified blueprints + randomized numbers so every web is mathematically airtight
+      for (let attempt = 0; attempt < 200; attempt++) {
+        const useMulDiv = difficulty !== "beginner";
+        const maxNum = difficulty === "beginner" ? 15 : difficulty === "intermediate" ? 28 : 48;
+
+        // Build a rich 7x7 interlocking 6-equation crossword web:
+        // Eq1 (Row 0, cols 0..4): N00 op1 N02 = N04
+        // Eq2 (Col 0, rows 0..4): N00 op2 N20 = N40
+        // Eq3 (Col 4, rows 0..4): N04 op3 N24 = N44
+        // Eq4 (Row 2, cols 2..6): N22 op4 N24 = N26
+        // Eq5 (Col 2, rows 2..6): N22 op5 N42 = N62
+        // Eq6 (Row 4, cols 0..4): N40 op6 N42 = N44  (Locks the central loop!)
+        // Eq7 (Row 6, cols 2..6): N62 op7 N64 = N66
+
+        // Anchor the central 3x3 loop first:
+        // N00 + N02 = N04
+        //  +     ×     +
+        // N20 + N22 = N24  (or let N24 participate in Col 4 and Row 2)
+        // Let's make Col 0: N00 + N20 = N40
+        // Col 4: N04 + N24 = N44
+        // Row 4: N40 + N42 = N44  => requires N44 > N40, so N04 + N24 > N00 + N20 => N02 + N24 > N20 (easy!)
+        const N00 = randInt(2, Math.floor(maxNum * 0.5));
+        const N02 = randInt(2, Math.floor(maxNum * 0.5));
+        const N04 = N00 + N02;
+
+        const N20 = randInt(2, Math.floor(maxNum * 0.45));
+        const N40 = N00 + N20;
+
+        const N24 = randInt(N20 + 1, Math.floor(maxNum * 0.7));
+        const N44 = N04 + N24;
+        const N42 = N44 - N40; // Positive because N44 = N00 + N02 + N24 > N00 + N20 = N40!
+
+        // Now attach Eq4 (Row 2, cols 2..6): N22 * N24 = N26 (or +)
+        let op4 = "+";
+        let N22 = randInt(2, 12);
+        let N26 = N22 + N24;
+        if (useMulDiv && N24 <= 12) {
+          op4 = "×";
+          N22 = randInt(2, 6);
+          N26 = N22 * N24;
+        }
+
+        // Attach Eq5 (Col 2, rows 2..6): N22 + N42 = N62 (or if N22 % N42 === 0, ÷)
+        const op5 = "+";
+        const N62 = N22 + N42;
+
+        // Attach Eq7 (Row 6, cols 2..6): N62 - N64 = N66
+        const N64 = randInt(1, N62 - 1);
+        const N66 = N62 - N64;
+
+        // Attach Bonus Top-Right Division/Multiplication tail (Col 6, rows 2..6):
+        // Let's check N26, N46, N66 -> If we add op8 at (3,6) and '=' at (5,6):
+        // We need N26 op8 N46 = N66. If N26 > N66, op8 = '-' and N46 = N26 - N66!
+        const hasRightCol = N26 > N66;
+        const N46 = hasRightCol ? N26 - N66 : null;
+
+        const nodeList = [
+          { r: 0, c: 0, val: N00, hide: true },
+          { r: 0, c: 2, val: N02, hide: false },
+          { r: 0, c: 4, val: N04, hide: true },
+          { r: 2, c: 0, val: N20, hide: false },
+          { r: 2, c: 2, val: N22, hide: true },
+          { r: 2, c: 4, val: N24, hide: true },
+          { r: 2, c: 6, val: N26, hide: false },
+          { r: 4, c: 0, val: N40, hide: true },
+          { r: 4, c: 2, val: N42, hide: true },
+          { r: 4, c: 4, val: N44, hide: false },
+          { r: 6, c: 2, val: N62, hide: true },
+          { r: 6, c: 4, val: N64, hide: false },
+          { r: 6, c: 6, val: N66, hide: true }
+        ];
+
+        if (hasRightCol) {
+          nodeList.push({ r: 4, c: 6, val: N46, hide: difficulty !== "beginner" });
+        }
+
+        // Adjust hidden count by difficulty
+        const targetBlanks = difficulty === "beginner" ? 5 : difficulty === "intermediate" ? 7 : 9;
+        const shuffledIdx = shuffleArray(nodeList.map((_, i) => i));
+        nodeList.forEach(n => (n.hide = false));
+        for (let i = 0; i < Math.min(targetBlanks, nodeList.length - 4); i++) {
+          nodeList[shuffledIdx[i]].hide = true;
+        }
+
+        const cells = [];
+        const bank = [];
+
+        nodeList.forEach(n => {
+          if (n.hide) bank.push(n.val);
+          cells.push({
+            r: n.r,
+            c: n.c,
+            type: n.hide ? "slot" : "num",
+            solution: n.val,
+            value: n.hide ? null : n.val
+          });
+        });
+
+        const ops = [
+          // Row 0
+          { r: 0, c: 1, text: "+" }, { r: 0, c: 3, text: "=" },
+          // Col 0
+          { r: 1, c: 0, text: "+" }, { r: 3, c: 0, text: "=" },
+          // Col 4
+          { r: 1, c: 4, text: "+" }, { r: 3, c: 4, text: "=" },
+          // Row 2
+          { r: 2, c: 3, text: op4 }, { r: 2, c: 5, text: "=" },
+          // Col 2
+          { r: 3, c: 2, text: op5 }, { r: 5, c: 2, text: "=" },
+          // Row 4
+          { r: 4, c: 1, text: "+" }, { r: 4, c: 3, text: "=" },
+          // Row 6
+          { r: 6, c: 3, text: "-" }, { r: 6, c: 5, text: "=" }
+        ];
+
+        if (hasRightCol) {
+          ops.push({ r: 3, c: 6, text: "-" }, { r: 5, c: 6, text: "=" });
+        }
+
+        ops.forEach(o => cells.push({ r: o.r, c: o.c, type: "op", text: o.text }));
+
+        const equations = [
+          { id: "r0", operands: [{ r: 0, c: 0 }, { r: 0, c: 2 }], operators: ["+"], result: { r: 0, c: 4 } },
+          { id: "c0", operands: [{ r: 0, c: 0 }, { r: 2, c: 0 }], operators: ["+"], result: { r: 4, c: 0 } },
+          { id: "c4", operands: [{ r: 0, c: 4 }, { r: 2, c: 4 }], operators: ["+"], result: { r: 4, c: 4 } },
+          { id: "r2", operands: [{ r: 2, c: 2 }, { r: 2, c: 4 }], operators: [op4], result: { r: 2, c: 6 } },
+          { id: "c2", operands: [{ r: 2, c: 2 }, { r: 4, c: 2 }], operators: [op5], result: { r: 6, c: 2 } },
+          { id: "r4", operands: [{ r: 4, c: 0 }, { r: 4, c: 2 }], operators: ["+"], result: { r: 4, c: 4 } },
+          { id: "r6", operands: [{ r: 6, c: 2 }, { r: 6, c: 4 }], operators: ["-"], result: { r: 6, c: 6 } }
+        ];
+
+        if (hasRightCol) {
+          equations.push({ id: "c6", operands: [{ r: 2, c: 6 }, { r: 4, c: 6 }], operators: ["-"], result: { r: 6, c: 6 } });
+        }
+
+        // Distractors in intermediate+
+        const extraTiles = difficulty === "beginner" ? 0 : difficulty === "intermediate" ? 2 : 3;
+        for (let d = 0; d < extraTiles; d++) {
+          bank.push(randInt(1, maxNum));
+        }
+
+        const puzzle = {
+          mode: "crossword",
+          rows: 7,
+          cols: 7,
+          cells,
+          equations,
+          bank: shuffleArray(bank)
+        };
+
+        if (verifyPuzzleBlueprint(puzzle)) return puzzle;
+      }
+      return generateClassic3x3(difficulty, stage);
+    }
+
+    /**
+     * MODE 3: TARGET SUM / EQUATION BUILDER (Like Reference Image 3)
+     * "[ ] + [ ] + [ ] = 20" with a pool of 8-10 stone/parchment tiles
+     */
+    function generateTargetSum(difficulty, stage) {
+      const slotCount = (difficulty === "advanced" || difficulty === "expert") ? 4 : 3;
+      const poolSize = difficulty === "beginner" ? 8 : 10;
+
+      for (let attempt = 0; attempt < 200; attempt++) {
+        // Stage 1 Beginner uses the exact iconic Reference Image 3 numbers: 7 + 8 + 5 = 20!
+        let chosen = [];
+        let ops = [];
+        let target = 20;
+        let bank = [];
+
+        if (stage === 1 && difficulty === "beginner" && attempt === 0) {
+          chosen = [7, 8, 5];
+          ops = ["+", "+"];
+          target = 20;
+          bank = [7, 8, 4, 6, 11, 19, 17, 5];
+        } else {
+          const maxTile = difficulty === "beginner" ? 15 : difficulty === "intermediate" ? 25 : 40;
+          for (let i = 0; i < slotCount; i++) {
+            chosen.push(randInt(2, maxTile));
+          }
+          ops = Array(slotCount - 1).fill("+");
+          if (difficulty === "advanced" || difficulty === "expert") {
+            // Mix in a subtraction or multiplication cleanly
+            ops[slotCount - 2] = Math.random() < 0.5 ? "-" : "+";
+          }
+
+          // Compute exact target
+          let acc = chosen[0];
+          for (let i = 0; i < ops.length; i++) {
+            acc = ops[i] === "+" ? acc + chosen[i + 1] : acc - chosen[i + 1];
+          }
+          if (acc <= 5 || acc > 150) continue;
+          target = acc;
+
+          bank = [...chosen];
+          while (bank.length < poolSize) {
+            const candidate = randInt(1, maxTile + 8);
+            bank.push(candidate);
+          }
+        }
+
+        const cells = [];
+        const operandCoords = [];
+
+        for (let i = 0; i < slotCount; i++) {
+          const col = i * 2;
+          cells.push({
+            r: 0,
+            c: col,
+            type: "slot",
+            solution: chosen[i],
+            value: null
+          });
+          operandCoords.push({ r: 0, c: col });
+
+          if (i < slotCount - 1) {
+            cells.push({
+              r: 0,
+              c: col + 1,
+              type: "op",
+              text: ops[i]
+            });
+          }
+        }
+
+        const eqCol = slotCount * 2 - 1;
+        const resCol = slotCount * 2;
+        cells.push({ r: 0, c: eqCol, type: "op", text: "=" });
+        cells.push({ r: 0, c: resCol, type: "num", solution: target, value: target });
+
+        const puzzle = {
+          mode: "target",
+          slotCount,
+          targetValue: target,
+          rows: 1,
+          cols: resCol + 1,
+          cells,
+          equations: [
+            {
+              id: "target_eq",
+              operands: operandCoords,
+              operators: ops,
+              result: { r: 0, c: resCol }
+            }
+          ],
+          bank: shuffleArray(bank)
+        };
+
+        if (verifyPuzzleBlueprint(puzzle)) return puzzle;
+      }
+      return null;
+    }
+
+    // --------------------------------------------------------------------------
+    // 5. GAME STATE MANAGEMENT
+    // --------------------------------------------------------------------------
+    const state = {
+      lang: "en",
+      theme: "parchment", // "parchment" | "dark"
+      mode: "mixed",      // "mixed" | "classic" | "crossword" | "target"
+      difficulty: "beginner", // "beginner" | "intermediate" | "advanced" | "expert"
+      stage: 1,
+      score: 0,
+      hintsLeft: 3,
+      paused: false,
+      timerInterval: null,
+      timeRemaining: null,
+      timeElapsed: 0,
+      isTimed: false,
+      puzzle: null,
+      selectedBankIdx: null,
+      selectedSlotKey: null,
+      bankUsed: [] // boolean[] tracking which tile index in puzzle.bank is placed
+    };
+
+    const DIFF_CONFIG = {
+      beginner: { timed: false, seconds: 0, basePoints: 100 },
+      intermediate: { timed: false, seconds: 0, basePoints: 180 },
+      advanced: { timed: true, seconds: 90, basePoints: 300 },
+      expert: { timed: true, seconds: 60, basePoints: 450 }
+    };
+
+    // --------------------------------------------------------------------------
+    // 6. DOM REFERENCES & UI HELPERS
+    // --------------------------------------------------------------------------
+    const el = {
+      settingsScreen: document.getElementById("settingsScreen"),
+      gameScreen: document.getElementById("gameScreen"),
+      puzzleGrid: document.getElementById("puzzleGrid"),
+      tileBank: document.getElementById("tileBank"),
+      boardModeBanner: document.getElementById("boardModeBanner"),
+      targetPromptContainer: document.getElementById("targetPromptContainer"),
+      hudStageVal: document.getElementById("hudStageVal"),
+      hudScoreVal: document.getElementById("hudScoreVal"),
+      hudTimerBox: document.getElementById("hudTimerBox"),
+      hudTimerVal: document.getElementById("hudTimerVal"),
+      hintCountBadge: document.getElementById("hintCountBadge"),
+      eqProgressText: document.getElementById("eqProgressText"),
+      pauseModal: document.getElementById("pauseModal"),
+      winModal: document.getElementById("winModal"),
+      timeoutModal: document.getElementById("timeoutModal"),
+      toastMsg: document.getElementById("toastMsg")
+    };
+
+    let toastTimer = null;
+    function showToast(msg) {
+      el.toastMsg.textContent = msg;
+      el.toastMsg.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.toastMsg.classList.remove("show"), 2200);
+    }
+
+    function t(key, vars = {}) {
+      let str = (I18N[state.lang] && I18N[state.lang][key]) || I18N.en[key] || key;
+      for (const [k, v] of Object.entries(vars)) {
+        str = str.replace(`{${k}}`, v);
+      }
+      return str;
+    }
+
+    function applyTranslations() {
+      document.documentElement.lang = state.lang;
+      document.documentElement.dir = state.lang === "ar" ? "rtl" : "ltr";
+
+      document.querySelectorAll("[data-i18n]").forEach(node => {
+        const key = node.getAttribute("data-i18n");
+        node.textContent = t(key);
+      });
+
+      document.getElementById("uiAppTitle").textContent = t("appTitle");
+      document.getElementById("uiAppSubtitle").textContent = t("appSubtitle");
+      document.getElementById("uiModeLabel").textContent = t("modeLabel");
+      document.getElementById("uiDiffLabel").textContent = t("diffLabel");
+      document.getElementById("uiPrefLabel").textContent = t("prefLabel");
+      document.getElementById("uiStartBtn").textContent = t("startBtn");
+      document.getElementById("uiDownloadBtn").textContent = t("downloadBtn");
+      document.getElementById("hudTimerLabel").textContent = t("hudTime");
+      document.getElementById("bankInstruction").textContent = t("bankHint");
+
+      document.getElementById("themeText").textContent =
+        state.theme === "parchment" ? t("themeParchment") : t("themeDark");
+      document.getElementById("themeIcon").textContent =
+        state.theme === "parchment" ? "📜" : "🌙";
+
+      document.getElementById("soundText").textContent =
+        sfx.enabled ? t("soundOn") : t("soundOff");
+      document.getElementById("soundIcon").textContent =
+        sfx.enabled ? "🔊" : "🔇";
+
+      document.getElementById("langText").textContent =
+        state.lang === "en" ? "English" : "العربية";
+
+      if (state.puzzle) {
+        updateModeBanner();
+        evaluateBoardState(false);
+      }
+    }
+
+    function updateModeBanner() {
+      if (!state.puzzle) return;
+      if (state.puzzle.mode === "classic") {
+        el.boardModeBanner.textContent = t("bannerClassic");
+        el.targetPromptContainer.classList.add("hidden");
+      } else if (state.puzzle.mode === "crossword") {
+        el.boardModeBanner.textContent = t("bannerCrossword");
+        el.targetPromptContainer.classList.add("hidden");
+      } else {
+        el.boardModeBanner.textContent = t("bannerTarget");
+        el.targetPromptContainer.classList.remove("hidden");
+        const promptKey = state.puzzle.slotCount === 4 ? "targetPrompt4" : "targetPrompt3";
+        el.targetPromptContainer.textContent = t(promptKey, { target: state.puzzle.targetValue });
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // 7. TIMER ENGINE (COUNTDOWN ON ADVANCED/EXPERT, ELAPSED ON BEGINNER/INTER)
+    // --------------------------------------------------------------------------
+    function stopTimer() {
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+      }
+    }
+
+    function formatSeconds(sec) {
+      const s = Math.max(0, Math.floor(sec));
+      const mins = Math.floor(s / 60);
+      const rem = s % 60;
+      return `${mins}:${rem.toString().padStart(2, "0")}`;
+    }
+
+    function startStageTimer() {
+      stopTimer();
+      const cfg = DIFF_CONFIG[state.difficulty];
+      state.isTimed = cfg.timed;
+      state.timeElapsed = 0;
+
+      if (cfg.timed) {
+        // Scale slightly with stage depth while keeping generous fair play
+        state.timeRemaining = Math.max(45, cfg.seconds - Math.floor((state.stage - 1) / 3) * 5);
+        el.hudTimerVal.textContent = formatSeconds(state.timeRemaining);
+        el.hudTimerBox.classList.remove("warning");
+      } else {
+        state.timeRemaining = null;
+        el.hudTimerVal.textContent = "0:00";
+        el.hudTimerBox.classList.remove("warning");
+      }
+
+      state.timerInterval = setInterval(() => {
+        if (state.paused) return;
+
+        if (state.isTimed) {
+          state.timeRemaining -= 1;
+          el.hudTimerVal.textContent = formatSeconds(state.timeRemaining);
+
+          if (state.timeRemaining <= 15) {
+            el.hudTimerBox.classList.add("warning");
+            if (state.timeRemaining > 0 && state.timeRemaining <= 5) {
+              sfx.playTone(880, "sine", 0.06, 0.08);
+            }
+          }
+
+          if (state.timeRemaining <= 0) {
+            stopTimer();
+            sfx.equationInvalid();
+            el.timeoutModal.classList.remove("hidden");
+          }
+        } else {
+          state.timeElapsed += 1;
+          el.hudTimerVal.textContent = formatSeconds(state.timeElapsed);
+        }
+      }, 1000);
+    }
+
+    // --------------------------------------------------------------------------
+    // 8. STAGE LOADING & BOARD RENDERING
+    // --------------------------------------------------------------------------
+    function resolveEffectiveMode() {
+      if (state.mode !== "mixed") return state.mode;
+      const cycle = ["classic", "target", "crossword"];
+      return cycle[(state.stage - 1) % cycle.length];
+    }
+
+    function loadStage(stageNum) {
+      state.stage = stageNum;
+      state.hintsLeft = 3;
+      state.paused = false;
+      state.selectedBankIdx = null;
+      state.selectedSlotKey = null;
+
+      el.pauseModal.classList.add("hidden");
+      el.winModal.classList.add("hidden");
+      el.timeoutModal.classList.add("hidden");
+      el.puzzleGrid.classList.remove("blurred");
+
+      const effectiveMode = resolveEffectiveMode();
+      let generated = null;
+
+      if (effectiveMode === "classic") {
+        generated = generateClassic3x3(state.difficulty, state.stage);
+      } else if (effectiveMode === "crossword") {
+        generated = generateCrosswordWeb(state.difficulty, state.stage);
+      } else {
+        generated = generateTargetSum(state.difficulty, state.stage);
+      }
+
+      // Fallback safety guarantee
+      if (!generated || !verifyPuzzleBlueprint(generated)) {
+        generated = generateClassic3x3("beginner", 1);
+      }
+
+      state.puzzle = generated;
+      state.bankUsed = new Array(generated.bank.length).fill(false);
+
+      el.hudStageVal.textContent = state.stage;
+      el.hudScoreVal.textContent = state.score;
+      el.hintCountBadge.textContent = state.hintsLeft;
+
+      updateModeBanner();
+      renderBoard();
+      renderTileBank();
+      evaluateBoardState(false);
+      startStageTimer();
+    }
+
+    function computeResponsiveCellSize(cols, rows) {
+      const vw = Math.min(window.innerWidth, 740);
+      const vh = window.innerHeight;
+      const maxAvailW = vw - 56;
+      const maxAvailH = vh - 300;
+      const sizeByW = Math.floor((maxAvailW - (cols - 1) * 6) / cols);
+      const sizeByH = Math.floor((maxAvailH - (rows - 1) * 6) / rows);
+      const clamped = Math.max(36, Math.min(68, sizeByW, sizeByH));
+      return clamped;
+    }
+
+    function renderBoard() {
+      const p = state.puzzle;
+      el.puzzleGrid.innerHTML = "";
+      el.puzzleGrid.className = `grid-container mode-${p.mode}`;
+
+      // Keep math equations strictly Left-to-Right even when UI language is Arabic
+      el.puzzleGrid.setAttribute("dir", "ltr");
+
+      const cellSize = computeResponsiveCellSize(p.cols, p.rows);
+      el.puzzleGrid.style.setProperty("--cell-size", `${cellSize}px`);
+      el.puzzleGrid.style.setProperty("--cell-font", `${Math.max(15, Math.floor(cellSize * 0.42))}px`);
+      el.puzzleGrid.style.gridTemplateColumns = `repeat(${p.cols}, var(--cell-size))`;
+      el.puzzleGrid.style.gridTemplateRows = `repeat(${p.rows}, var(--cell-size))`;
+
+      const lookup = new Map();
+      p.cells.forEach(c => lookup.set(`${c.r},${c.c}`, c));
+
+      for (let r = 0; r < p.rows; r++) {
+        for (let c = 0; c < p.cols; c++) {
+          const key = `${r},${c}`;
+          const cellData = lookup.get(key);
+          const div = document.createElement("div");
+          div.dataset.key = key;
+
+          if (!cellData) {
+            div.className = "cell cell-empty";
+          } else if (cellData.type === "op") {
+            div.className = "cell cell-op";
+            div.textContent = cellData.text;
+          } else if (cellData.type === "num") {
+            div.className = "cell cell-num cell-fixed";
+            div.textContent = cellData.value;
+          } else if (cellData.type === "slot") {
+            div.className = "cell cell-slot";
+            if (cellData.value !== null) {
+              div.classList.add("filled");
+              div.textContent = cellData.value;
+            }
+            if (state.selectedSlotKey === key) {
+              div.classList.add("selected-slot");
+            }
+
+            // Click / Tap interaction
+            div.addEventListener("click", () => handleSlotTap(key));
+
+            // Drag & Drop support
+            div.addEventListener("dragover", e => e.preventDefault());
+            div.addEventListener("drop", e => {
+              e.preventDefault();
+              const bankIdx = parseInt(e.dataTransfer.getData("text/plain"), 10);
+              if (!Number.isNaN(bankIdx)) {
+                placeBankTileIntoSlot(bankIdx, key);
+              }
+            });
+          }
+
+          el.puzzleGrid.appendChild(div);
+        }
+      }
+    }
+
+    function renderTileBank() {
+      const p = state.puzzle;
+      el.tileBank.innerHTML = "";
+      el.tileBank.setAttribute("dir", "ltr");
+
+      p.bank.forEach((numVal, idx) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "bank-tile";
+        btn.textContent = numVal;
+        btn.draggable = !state.bankUsed[idx];
+
+        if (state.bankUsed[idx]) {
+          btn.classList.add("used");
+        }
+        if (state.selectedBankIdx === idx) {
+          btn.classList.add("selected");
+        }
+
+        btn.addEventListener("click", () => handleBankTileTap(idx));
+        btn.addEventListener("dragstart", e => {
+          if (state.bankUsed[idx]) {
+            e.preventDefault();
+            return;
+          }
+          state.selectedBankIdx = idx;
+          e.dataTransfer.setData("text/plain", String(idx));
+        });
+
+        el.tileBank.appendChild(btn);
+      });
+    }
+
+    // --------------------------------------------------------------------------
+    // 9. TILE PLACEMENT & INTERACTION LOGIC
+    // --------------------------------------------------------------------------
+    function getCellByKey(key) {
+      const [r, c] = key.split(",").map(Number);
+      return state.puzzle.cells.find(cell => cell.r === r && cell.c === c);
+    }
+
+    function handleBankTileTap(idx) {
+      if (state.paused || state.bankUsed[idx]) return;
+      sfx.selectTile();
+
+      if (state.selectedBankIdx === idx) {
+        state.selectedBankIdx = null;
+        renderTileBank();
+        return;
+      }
+
+      state.selectedBankIdx = idx;
+
+      // If a slot was already selected, immediately place tile there!
+      if (state.selectedSlotKey) {
+        placeBankTileIntoSlot(idx, state.selectedSlotKey);
+        return;
+      }
+
+      renderTileBank();
+    }
+
+    function handleSlotTap(key) {
+      if (state.paused) return;
+      const cell = getCellByKey(key);
+      if (!cell || cell.type !== "slot") return;
+
+      // Case A: A bank tile is currently selected -> place it (swapping if occupied)
+      if (state.selectedBankIdx !== null) {
+        placeBankTileIntoSlot(state.selectedBankIdx, key);
+        return;
+      }
+
+      // Case B: Slot is already filled -> return its tile back to the bank
+      if (cell.value !== null && cell.bankIdx !== undefined) {
+        state.bankUsed[cell.bankIdx] = false;
+        cell.value = null;
+        cell.bankIdx = undefined;
+        state.selectedSlotKey = null;
+        sfx.removeTile();
+        renderBoard();
+        renderTileBank();
+        evaluateBoardState(true);
+        return;
+      }
+
+      // Case C: Empty slot tapped without a tile selected -> highlight slot
+      sfx.selectTile();
+      state.selectedSlotKey = state.selectedSlotKey === key ? null : key;
+      renderBoard();
+    }
+
+    function placeBankTileIntoSlot(bankIdx, slotKey) {
+      const cell = getCellByKey(slotKey);
+      if (!cell || cell.type !== "slot" || state.bankUsed[bankIdx]) return;
+
+      // Return existing tile if slot was occupied
+      if (cell.value !== null && cell.bankIdx !== undefined) {
+        state.bankUsed[cell.bankIdx] = false;
+      }
+
+      cell.value = state.puzzle.bank[bankIdx];
+      cell.bankIdx = bankIdx;
+      state.bankUsed[bankIdx] = true;
+
+      state.selectedBankIdx = null;
+      state.selectedSlotKey = null;
+
+      sfx.placeTile();
+      renderBoard();
+      renderTileBank();
+      evaluateBoardState(true);
+    }
+
+    // --------------------------------------------------------------------------
+    // 10. LIVE EQUATION VERIFICATION & WIN CHECK
+    // --------------------------------------------------------------------------
+    function evaluateBoardState(playFeedback = true) {
+      const p = state.puzzle;
+      const cellLookup = new Map();
+      p.cells.forEach(c => cellLookup.set(`${c.r},${c.c}`, c));
+
+      // Clear previous status highlights
+      document.querySelectorAll(".cell").forEach(domCell => {
+        domCell.classList.remove("valid-eq", "invalid-eq");
+      });
+
+      let validCount = 0;
+      let newlyCompletedInvalid = false;
+
+      p.equations.forEach(eq => {
+        const coords = [...eq.operands, eq.result];
+        const vals = eq.operands.map(coord => cellLookup.get(`${coord.r},${coord.c}`).value);
+        const targetVal = cellLookup.get(`${eq.result.r},${eq.result.c}`).value;
+
+        const status = evaluateEquationTokens(vals, eq.operators, targetVal);
+
+        if (status.complete) {
+          if (status.valid) {
+            validCount++;
+            coords.forEach(coord => {
+              const dom = el.puzzleGrid.querySelector(`[data-key="${coord.r},${coord.c}"]`);
+              if (dom) dom.classList.add("valid-eq");
+            });
+          } else {
+            newlyCompletedInvalid = true;
+            coords.forEach(coord => {
+              const dom = el.puzzleGrid.querySelector(`[data-key="${coord.r},${coord.c}"]`);
+              if (dom) dom.classList.add("invalid-eq");
+            });
+          }
+        }
+      });
+
+      el.eqProgressText.textContent = t("eqProgress", {
+        valid: validCount,
+        total: p.equations.length
+      });
+
+      // Check if all slots are filled and ALL equations evaluate accurately
+      const allSlotsFilled = p.cells.filter(c => c.type === "slot").every(c => c.value !== null);
+
+      if (allSlotsFilled && validCount === p.equations.length) {
+        handleStageComplete();
+      } else if (playFeedback && newlyCompletedInvalid) {
+        sfx.equationInvalid();
+      }
+    }
+
+    function handleStageComplete() {
+      stopTimer();
+      sfx.stageWin();
+
+      const cfg = DIFF_CONFIG[state.difficulty];
+      const timeBonus = state.isTimed ? Math.max(0, state.timeRemaining * 3) : 50;
+      const earned = cfg.basePoints + timeBonus;
+      state.score += earned;
+      el.hudScoreVal.textContent = state.score;
+
+      document.getElementById("winStatStage").textContent = state.stage;
+      document.getElementById("winStatBonus").textContent = `+${timeBonus}`;
+      document.getElementById("winStatTotal").textContent = state.score;
+
+      setTimeout(() => {
+        el.winModal.classList.remove("hidden");
+      }, 320);
+    }
+
+    // --------------------------------------------------------------------------
+    // 11. HINT & CLEAR BOARD ACTIONS
+    // --------------------------------------------------------------------------
+    function useHint() {
+      if (state.paused) return;
+      if (state.hintsLeft <= 0) {
+        showToast(t("toastNoHints"));
+        return;
+      }
+
+      // Find an empty slot or an incorrectly filled slot
+      const targetSlot = state.puzzle.cells.find(
+        c => c.type === "slot" && c.value !== c.solution
+      );
+      if (!targetSlot) return;
+
+      // Free current wrong tile if present
+      if (targetSlot.value !== null && targetSlot.bankIdx !== undefined) {
+        state.bankUsed[targetSlot.bankIdx] = false;
+      }
+
+      // Locate an unused bank tile matching targetSlot.solution
+      let matchingBankIdx = state.puzzle.bank.findIndex(
+        (val, idx) => val === targetSlot.solution && !state.bankUsed[idx]
+      );
+
+      // If all matching tiles are placed in wrong slots, reclaim one
+      if (matchingBankIdx === -1) {
+        const donorSlot = state.puzzle.cells.find(
+          c => c.type === "slot" && c !== targetSlot && c.value === targetSlot.solution
+        );
+        if (donorSlot) {
+          matchingBankIdx = donorSlot.bankIdx;
+          state.bankUsed[matchingBankIdx] = false;
+          donorSlot.value = null;
+          donorSlot.bankIdx = undefined;
+        }
+      }
+
+      if (matchingBankIdx !== -1) {
+        state.hintsLeft--;
+        el.hintCountBadge.textContent = state.hintsLeft;
+        showToast(t("toastHintUsed"));
+        placeBankTileIntoSlot(matchingBankIdx, `${targetSlot.r},${targetSlot.c}`);
+      }
+    }
+
+    function clearUserPlacements() {
+      if (state.paused) return;
+      state.puzzle.cells.forEach(c => {
+        if (c.type === "slot") {
+          c.value = null;
+          c.bankIdx = undefined;
+        }
+      });
+      state.bankUsed.fill(false);
+      state.selectedBankIdx = null;
+      state.selectedSlotKey = null;
+      sfx.removeTile();
+      showToast(t("toastCleared"));
+      renderBoard();
+      renderTileBank();
+      evaluateBoardState(false);
+    }
+
+    // --------------------------------------------------------------------------
+    // 12. NAVIGATION & EVENT BINDINGS
+    // --------------------------------------------------------------------------
+    function switchScreen(target) {
+      if (target === "game") {
+        el.settingsScreen.classList.add("hidden");
+        el.gameScreen.classList.remove("hidden");
+      } else {
+        stopTimer();
+        el.gameScreen.classList.add("hidden");
+        el.settingsScreen.classList.remove("hidden");
+      }
+    }
+
+    // Mode Selection
+    document.getElementById("modeSelector").addEventListener("click", e => {
+      const btn = e.target.closest(".choice-btn");
+      if (!btn) return;
+      sfx.selectTile();
+      document.querySelectorAll("#modeSelector .choice-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      state.mode = btn.dataset.mode;
+    });
+
+    // Difficulty Selection
+    document.getElementById("diffSelector").addEventListener("click", e => {
+      const btn = e.target.closest(".choice-btn");
+      if (!btn) return;
+      sfx.selectTile();
+      document.querySelectorAll("#diffSelector .choice-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      state.difficulty = btn.dataset.diff;
+    });
+
+    // Theme Toggle
+    document.getElementById("btnToggleTheme").addEventListener("click", () => {
+      sfx.selectTile();
+      state.theme = state.theme === "parchment" ? "dark" : "parchment";
+      document.body.classList.toggle("theme-dark", state.theme === "dark");
+      applyTranslations();
+    });
+
+    // Sound Toggle
+    document.getElementById("btnToggleSound").addEventListener("click", () => {
+      sfx.enabled = !sfx.enabled;
+      if (sfx.enabled) sfx.selectTile();
+      applyTranslations();
+    });
+
+    // Language Toggle
+    document.getElementById("btnToggleLang").addEventListener("click", () => {
+      sfx.selectTile();
+      state.lang = state.lang === "en" ? "ar" : "en";
+      applyTranslations();
+    });
+
+    // Start Game
+    document.getElementById("btnStartGame").addEventListener("click", () => {
+      sfx.placeTile();
+      state.score = 0;
+      switchScreen("game");
+      loadStage(1);
+    });
+
+    // Offline HTML Export
+    document.getElementById("btnDownloadOffline").addEventListener("click", () => {
+      sfx.selectTile();
+      const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "HOG-Cross-Math-Offline.html";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    // Game HUD Buttons
+    document.getElementById("btnHint").addEventListener("click", useHint);
+    document.getElementById("btnClearBoard").addEventListener("click", clearUserPlacements);
+
+    document.getElementById("btnPause").addEventListener("click", () => {
+      sfx.selectTile();
+      state.paused = true;
+      el.puzzleGrid.classList.add("blurred");
+      el.pauseModal.classList.remove("hidden");
+    });
+
+    // Pause Modal Buttons
+    document.getElementById("btnResume").addEventListener("click", () => {
+      sfx.selectTile();
+      state.paused = false;
+      el.puzzleGrid.classList.remove("blurred");
+      el.pauseModal.classList.add("hidden");
+    });
+
+    document.getElementById("btnRestartStage").addEventListener("click", () => {
+      sfx.selectTile();
+      loadStage(state.stage);
+    });
+
+    document.getElementById("btnBackSettings").addEventListener("click", () => {
+      sfx.selectTile();
+      el.pauseModal.classList.add("hidden");
+      switchScreen("settings");
+    });
+
+    // Win & Timeout Modal Buttons
+    document.getElementById("btnNextStage").addEventListener("click", () => {
+      sfx.placeTile();
+      loadStage(state.stage + 1);
+    });
+
+    document.getElementById("btnWinSettings").addEventListener("click", () => {
+      sfx.selectTile();
+      el.winModal.classList.add("hidden");
+      switchScreen("settings");
+    });
+
+    document.getElementById("btnRetryTimeout").addEventListener("click", () => {
+      sfx.selectTile();
+      loadStage(state.stage);
+    });
+
+    document.getElementById("btnTimeoutSettings").addEventListener("click", () => {
+      sfx.selectTile();
+      el.timeoutModal.classList.add("hidden");
+      switchScreen("settings");
+    });
+
+    // Responsive Resize Handler
+    window.addEventListener("resize", () => {
+      if (!el.gameScreen.classList.contains("hidden") && state.puzzle) {
+        renderBoard();
+        evaluateBoardState(false);
+      }
+    });
+
+    // Initial Boot
+    /* --- HOG app hosting: language, sound, calm mode, progress --- */
+    const HG = window.HOG || null, CALM = !!(HG && HG.calm);
+    if (HG) {
+      if (HG.lang === "ar") state.lang = "ar";
+      if (HG.sound === false) sfx.enabled = false;
+      const dl = document.getElementById("btnDownloadOffline");
+      if (dl) dl.style.display = "none";
+      if (CALM) {
+        document.querySelectorAll("#diffSelector .choice-btn").forEach(b => {
+          if (b.dataset.diff === "advanced" || b.dataset.diff === "expert") b.style.display = "none";
+        });
+        state.difficulty = "beginner";
+      }
+      const baseDone = handleStageComplete;
+      handleStageComplete = function () {
+        baseDone();
+        const stars = state.hintsLeft >= 3 ? 3 : state.hintsLeft >= 1 ? 2 : 1;
+        try { parent.postMessage({ hogdone: HG.id || "cross-math", stars }, "*"); } catch (e) {}
+      };
+    }
+    applyTranslations();
+  </script>
+</body>
+</html>
