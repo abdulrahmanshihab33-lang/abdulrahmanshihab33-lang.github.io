@@ -1722,10 +1722,11 @@ window.dlDesktop=async function(){if(!MISSION||!MISSION.html)return toast(tr('No
  d.onclick=end;setTimeout(end,2900);try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}})();
 
 /* ===== v13: HOG Arena (game market) + Clarity Garden (calm learning corner) ===== */
-const MKV='21';
+const MKV='22';
 const ARSEC=[['pitch','⚽','الملاعب','Pitches'],['oasis','📖','واحة النور','Light Oasis'],['mind','🎓','قاعة العقول','Mind Hall'],['nook','🧩','ركن الألغاز','Puzzle Nook'],['kids','🎈','عالم الصغار','Little World']];
 const MKT=[
  {id:'hog-math-domino',file:'game-math-domino.html',sec:'mind',icon:'🁣',n:['HOG Math Domino','HOG دومينو الحساب'],d:['Domino where every match is a maths fact: solve to place tiles. Solo vs AI, 2 or 4 players.','دومينو كل مطابقة فيه معادلة: احسب لتضع القطعة. ضد الذكاء أو لاعبين أو ٤ لاعبين.'],plan:0},
+ {id:'hog-way',file:'game-way.html',sec:'oasis',icon:'🏃',n:['HOG Way','HOG Way — مطاردة المعرفة'],d:['Subway-style runner: dodge obstacles and pick the right answer gates. Stages, coins and missions.','جري على طريقة صب واي: تفادَ العوائق واختر بوابة الإجابة الصحيحة. مراحل وعملات ومهام.'],plan:0},
  {id:'hog-hunt-letter',file:'game-hunt-letter.html',sec:'kids',icon:'🚀',n:['HOG Hunt the Letter','HOG صائد الحروف'],d:['A space journey through 10 planets: hunt letters, colours, shapes and numbers with limited energy and careful aim.','رحلة فضائية عبر 10 كواكب: اصطد الحروف والألوان والأشكال والأرقام بطاقة محدودة وتصويب دقيق.'],plan:0},
  {id:'hog-purple',file:'game-purple.html',sec:'nook',icon:'🟣',n:["HOG Don't Touch the Purple",'HOG لا تلمس البنفسجي'],d:['Tap the right colour, memorise the lights, and never touch the purple trap.','المس اللون الصحيح، احفظ ترتيب الأضواء، ولا تلمس فخ البنفسجي أبدًا.'],plan:0},
  {id:'hog-cue-clash',file:'game-cue-clash.html',sec:'pitch',icon:'🎱',n:['HOG Cue Clash','HOG كيو كلاش'],d:['Offline pool with 5 game modes, spin, fine aim and CPU levels.','بلياردو بدون إنترنت بخمسة أنماط وتحكم بالدوران وتصويب دقيق ومستويات كمبيوتر.'],plan:0},
@@ -1764,7 +1765,7 @@ window.calmView=function(){TAB='calm';nav();clearTimer();const c=cpGet();const t
 /* play any catalog game in the sandboxed overlay */
 window.playEntry=async function(id){const e=MKT.find(x=>x.id===id);if(!e)return;if(e.plan>planIdx()){toast('🔒 '+tr('Upgrade to unlock','رقِّ باقتك لفتحها'));return go('plans')}
  let html;try{const r=await fetch(e.file+'?v='+MKV);if(!r.ok)throw 0;html=await r.text()}catch(x){return toast('⚠️ '+tr('Could not load the game (check internet)','تعذّر تحميل اللعبة (تأكد من الإنترنت)'))}
- const c=cpGet(),calm=e.sec==='calm';const hog={id:e.id,lang:UI,calm:calm?c.calm:false,sound:calm?c.sound:true};
+ const c=cpGet(),calm=e.sec==='calm';const hog={id:e.id,lang:UI,calm:calm?c.calm:false,sound:calm?c.sound:true,avatar:(window.avGet&&avGet())||''};
  const pre=`<script>window.HOG=${JSON.stringify(hog)}<\/script>`+(calm?`<style>:root{--fs:${c.fs}px;--ls:${c.ls}em;--bg:${c.tint}}</style>`:'');
  const inj=h=>/<head[^>]*>/i.test(h)?h.replace(/<head[^>]*>/i,m=>m+pre):pre+h;const tag='<div style="position:fixed;bottom:4px;right:8px;font:600 10px sans-serif;color:#0008;pointer-events:none;z-index:99">Powered by HOG</div>';
  const full=inj(html).replace(/<\/body>/i,tag+'</body>');window.CURG={e,html:full};
@@ -2335,6 +2336,48 @@ window.hogpediaView=async function(){TAB='hogpedia';nav();clearTimer();if(!QB.re
  <input class="inp" style="width:100%;margin-top:8px" dir="auto" placeholder="${tr('Search…','ابحث…')}" value="${esc(HP.q)}" onchange="HP.q=this.value;hogpediaView()"></div>
  ${a.length?a.slice(0,60).map(x=>`<details class="card"><summary><b>${esc(x.question)}</b></summary><div style="margin-top:8px">✅ <b>${esc(x.options[x.correctIndex])}</b>${x.explanation?`<p class="mut">${esc(x.explanation)}</p>`:''}${x.source?`<div class="mut" style="font-size:12px">📎 ${esc(String(x.source).slice(0,120))}</div>`:''}</div></details>`).join(''):`<div class="card"><p class="mut">${tr('Nothing here yet. Load verified questions from the Question Bank page.','لا يوجد محتوى بعد. حمّل الأسئلة الموثّقة من صفحة بنك الأسئلة.')}</p><button class="btn sm" onclick="go('qbank')">📚 ${tr('Question Bank','بنك الأسئلة')}</button></div>`}
  <div class="mut" style="text-align:center;font-size:11px;padding:8px">Powered by HOG</div>`)};
+
+/* ================= v26: avatar, scroll rail, jump arrows, follow-up window ================= */
+const AVK='ga_avatar';
+window.avGet=()=>{try{return localStorage.getItem(AVK)||''}catch(e){return ''}};
+window.avSet=function(inp){const f=inp.files&&inp.files[0];if(!f)return;const g=SH.fileGuard(f);if(!g.ok||!/^image\//.test(f.type))return toast('🛡️ '+(g.why||tr('Images only','صور فقط')),3000);
+ const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const cv=document.createElement('canvas');cv.width=cv.height=256;const c=cv.getContext('2d'),s=Math.min(im.width,im.height);c.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,256,256);try{localStorage.setItem(AVK,cv.toDataURL('image/jpeg',.85));toast('✅ '+tr('Photo saved','تم حفظ صورتك'),2200)}catch(e){toast(tr('Could not save photo','تعذّر حفظ الصورة'),3000)}inp.value='';portView()};im.src=r.result};r.readAsDataURL(f)};
+window.avDel=()=>{try{localStorage.removeItem(AVK)}catch(e){}portView()};
+/* games get window.HOG.avatar */
+{const s=playEntry.toString();}
+/* portfolio: avatar block */
+{const _pb=pfBuild;pfBuild=async function(){let h=await _pb.apply(this,arguments);const av=avGet();if(av&&/^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(av)){h=h.replace(/<body[^>]*>/,m=>m+`<div style="text-align:center;padding-top:18px"><img alt="" src="${av}" style="width:112px;height:112px;border-radius:50%;object-fit:cover;border:4px solid #fff;box-shadow:0 4px 18px #0004"></div>`)}return h}}
+{const _pv=portView;portView=window.portView=function(){_pv.apply(this,arguments);const st=$('#stage'),c=st&&st.querySelector('.card');if(!c)return;const av=avGet();const d=document.createElement('div');d.className='row';d.style.cssText='margin:8px 0;align-items:center';d.innerHTML=`<span style="width:56px;height:56px;border-radius:50%;background:var(--soft2);overflow:hidden;display:inline-flex;align-items:center;justify-content:center;font-size:26px">${av?`<img alt="" src="${av}" style="width:100%;height:100%;object-fit:cover">`:'🙂'}</span><label class="btn alt sm" style="cursor:pointer">📷 ${tr('My photo (also your game character)','صورتي (وهي شخصيتي في الألعاب)')}<input type="file" accept="image/*" style="display:none" onchange="avSet(this)"></label>${av?`<button class="btn alt sm" onclick="avDel()">🗑</button>`:''}<div class="mut" style="font-size:11px;width:100%">🔒 ${tr('Your photo stays on this device only — never uploaded.','صورتك تبقى على جهازك فقط — لا تُرفع أبدًا.')}</div>`;const h=c.querySelector('p.mut');(h||c.firstChild).after(d)}}
+/* scroll rail + arrows */
+(function(){const css=`.scr{position:fixed;z-index:45;inset-inline-end:2px;top:72px;bottom:90px;width:14px;touch-action:none;opacity:.0;transition:opacity .2s}.scr.on{opacity:1}.scr i{position:absolute;inset-inline:3px;border-radius:99px;background:var(--acc);opacity:.75;min-height:34px}.scrb{position:fixed;z-index:46;inset-inline-end:14px;width:40px;height:40px;border-radius:50%;background:var(--sheet);color:var(--tx);border:1px solid var(--line);box-shadow:0 3px 12px #0006;font-size:18px;display:none}.scrb.on{display:block}#scrDn{bottom:150px}#scrUp{bottom:198px}`;const s=document.createElement('style');s.textContent=css;document.head.appendChild(s);
+ const rail=document.createElement('div');rail.className='scr';rail.innerHTML='<i></i>';const up=document.createElement('button'),dn=document.createElement('button');up.id='scrUp';dn.id='scrDn';up.className=dn.className='scrb';up.textContent='⬆';dn.textContent='⬇';up.setAttribute('aria-label','top');dn.setAttribute('aria-label','bottom');document.body.append(rail,up,dn);
+ const th=rail.firstChild,de=()=>document.scrollingElement||document.documentElement;let hide;
+ const upd=()=>{const e=de(),H=e.scrollHeight,V=innerHeight,y=e.scrollTop;const can_=H>V+160;rail.classList.toggle('on',can_&&(rail._d||Date.now()-(rail._t||0)<1400));if(!can_){up.classList.remove('on');dn.classList.remove('on');return}
+  const h=rail.clientHeight,tl=Math.max(34,h*V/H);th.style.height=tl+'px';th.style.top=((h-tl)*(y/(H-V)||0))+'px';up.classList.toggle('on',y>300);dn.classList.toggle('on',H-V-y>300)};
+ addEventListener('scroll',()=>{rail._t=Date.now();upd();clearTimeout(hide);hide=setTimeout(upd,1500)},{passive:true});addEventListener('resize',upd);setInterval(upd,1200);
+ up.onclick=()=>scrollTo({top:0,behavior:'smooth'});dn.onclick=()=>scrollTo({top:de().scrollHeight,behavior:'smooth'});
+ const mv=e=>{const r=rail.getBoundingClientRect(),p=Math.min(1,Math.max(0,(e.clientY-r.top)/r.height)),E=de();E.scrollTop=p*(E.scrollHeight-innerHeight)};
+ rail.onpointerdown=e=>{rail._d=1;rail.setPointerCapture(e.pointerId);mv(e);upd()};rail.onpointermove=e=>{if(rail._d)mv(e)};rail.onpointerup=()=>{rail._d=0;upd()};
+ rail.addEventListener('touchstart',()=>{rail.classList.add('on')},{passive:true})})();
+/* Follow-up window (agent <-> user) */
+window.FQ=window.FQ||{};
+FQ.pend=()=>store('ga_fq')||[];
+FQ.ask=function(q,opts,cb){const id='q'+Date.now();const it={id,q,opts:opts||[],t:Date.now()};const a=FQ.pend();a.push(it);store('ga_fq',a.slice(-10));FQ._cb=FQ._cb||{};FQ._cb[id]=cb;
+ if(document.hidden){try{notify('❓ HOG',q);if(navigator.serviceWorker&&navigator.serviceWorker.ready&&window.Notification&&Notification.permission==='granted')navigator.serviceWorker.ready.then(r=>r.showNotification(tr('HOG Agent asks','وكيل HOG يسأل'),{body:q,icon:'hog-192.png',tag:id,data:{fq:id}}))}catch(e){}}
+ else FQ.show(id);return id};
+FQ.show=function(id){const it=FQ.pend().find(x=>x.id===id);if(!it)return;showModal(`<h3>💭 ${tr('The agent asks','الوكيل يسألك')}</h3><p>${esc(it.q)}</p>${it.opts.length?`<div class="row" style="flex-wrap:wrap">${it.opts.map((o,i)=>`<button class="btn alt sm" onclick="FQ.answer('${id}',${i})">${esc(o)}</button>`).join('')}</div>`:''}<input id="fqin" class="inp" style="width:100%;margin-top:8px" dir="auto" placeholder="${tr('Or type your answer…','أو اكتب إجابتك…')}"><div class="row" style="margin-top:8px"><button class="btn" onclick="FQ.answer('${id}',-1)">${tr('Send','إرسال')}</button><button class="btn alt" onclick="closeModal()">${tr('Later','لاحقًا')}</button></div>`)};
+FQ.answer=function(id,i){const it=FQ.pend().find(x=>x.id===id);if(!it)return;const v=i>=0?it.opts[i]:($('#fqin')&&$('#fqin').value.trim());if(!v)return toast(tr('Write an answer','اكتب إجابة'),1800);store('ga_fq',FQ.pend().filter(x=>x.id!==id));closeModal();const cb=FQ._cb&&FQ._cb[id];if(cb)cb(v);else toast('✅ '+v,1800)};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){const p=FQ.pend();if(p.length&&!document.querySelector('.modal.on'))FQ.show(p[p.length-1].id)}});
+/* agent asks clarifying questions before building a vague game request */
+{const _cs2=window.chatSend;window.chatSend=async function(){const ta=$('#cin');const t=ta?ta.value.trim():'';
+  if(t&&!t.startsWith('/')&&t.length<28&&!window._fqSkip&&HL.analyzeIntentLocal(t).intent==='game'&&!(typeof ATT!=='undefined'&&ATT.length)){
+    ta.value='';try{chatGrow(ta)}catch(e){}userMsg(t);const ans={};
+    FQ.ask(tr('Who is the game for?','لمن اللعبة؟'),[tr('Kids','أطفال'),tr('Students','طلاب'),tr('Adults','كبار'),tr('Everyone','الجميع')],a1=>{ans.a=a1;
+      FQ.ask(tr('Which language?','بأي لغة؟'),['العربية','English',tr('Both','الاثنتان')],a2=>{ans.l=a2;
+        FQ.ask(tr('How many questions / levels?','كم عدد الأسئلة أو المستويات؟'),['5','10','20'],a3=>{ans.n=a3;window._fqSkip=1;ta.value=`${t} — ${tr('audience','الفئة')}: ${ans.a}، ${tr('language','اللغة')}: ${ans.l}، ${tr('count','العدد')}: ${ans.n}`;_cs2.call(window).finally(()=>{window._fqSkip=0})})})});return}
+  return _cs2.apply(this,arguments)};try{chatSend=window.chatSend}catch(e){}}
+/* user -> agent follow-up button in chat */
+window.fqUser=()=>qtOpen();
 </script>
 </body>
 </html>
