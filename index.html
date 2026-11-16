@@ -431,7 +431,7 @@ function toggleTheme(){const o=['dark','deep','light'],c=document.documentElemen
 
 /* ============ login by on-screen code ============ */
 function loginView(){TAB='login';
- if(!CODE)CODE=String(Math.floor(1000+Math.random()*9000));
+ if(!CODE)CODE=String(1000+(crypto.getRandomValues(new Uint32Array(1))[0]%9000));
  stage(`<div class="card" style="margin-top:30px;text-align:center"><div class="big">🔐</div><h3>${tr('Confirm your login','تأكيد تسجيل الدخول')}</h3>
  <p class="mut">${tr('Type the code shown below to enter HOG Gamify Anything.','اكتب الكود الظاهر بالأسفل للدخول إلى وكيل الألعاب.')}</p>
  <div class="codebox" dir="ltr">${CODE}</div>
@@ -851,7 +851,7 @@ function parseQuestions(text){
  return out}
 function imgData(f,max){return new Promise((res,rej)=>{const r=new FileReader();r.onerror=rej;r.onload=()=>{const im=new Image();im.onerror=()=>rej(new Error('bad image'));im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.78))};im.src=r.result};r.readAsDataURL(f)})}
 async function ocr(url){await loadScript(URL_OCR);const r=await Tesseract.recognize(url,'ara+eng');return r.data.text}
-async function pdfText(f){await loadScript(URL_PDF);pdfjsLib.GlobalWorkerOptions.workerSrc=URL_PDFW;const d=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;let t='';for(let i=1;i<=Math.min(d.numPages,40);i++){const pg=await d.getPage(i);const c=await pg.getTextContent();t+=c.items.map(x=>x.str+(x.hasEOL?'\n':' ')).join('')+'\n'}return t}
+async function pdfText(f){await loadScript(URL_PDF);pdfjsLib.GlobalWorkerOptions.workerSrc=URL_PDFW;const d=await pdfjsLib.getDocument({data:await f.arrayBuffer(),isEvalSupported:false,enableXfa:false}).promise;let t='';for(let i=1;i<=Math.min(d.numPages,40);i++){const pg=await d.getPage(i);const c=await pg.getTextContent();t+=c.items.map(x=>x.str+(x.hasEOL?'\n':' ')).join('')+'\n'}return t}
 async function docxText(f){await loadScript(URL_ZIP);const z=await JSZip.loadAsync(await f.arrayBuffer());const x=await z.file('word/document.xml').async('string');return x.replace(/<\/w:p>/g,'\n').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"')}
 function b64(f){return new Promise((res,rej)=>{const r=new FileReader();r.onerror=rej;r.onload=()=>res(String(r.result).split(',')[1]);r.readAsDataURL(f)})}
 const langOf=t=>/[؀-ۿ]/.test(t)?'ar':'en';
@@ -1722,9 +1722,10 @@ window.dlDesktop=async function(){if(!MISSION||!MISSION.html)return toast(tr('No
  d.onclick=end;setTimeout(end,2900);try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}})();
 
 /* ===== v13: HOG Arena (game market) + Clarity Garden (calm learning corner) ===== */
-const MKV='20';
+const MKV='21';
 const ARSEC=[['pitch','⚽','الملاعب','Pitches'],['oasis','📖','واحة النور','Light Oasis'],['mind','🎓','قاعة العقول','Mind Hall'],['nook','🧩','ركن الألغاز','Puzzle Nook'],['kids','🎈','عالم الصغار','Little World']];
 const MKT=[
+ {id:'hog-math-domino',file:'game-math-domino.html',sec:'mind',icon:'🁣',n:['HOG Math Domino','HOG دومينو الحساب'],d:['Domino where every match is a maths fact: solve to place tiles. Solo vs AI, 2 or 4 players.','دومينو كل مطابقة فيه معادلة: احسب لتضع القطعة. ضد الذكاء أو لاعبين أو ٤ لاعبين.'],plan:0},
  {id:'hog-hunt-letter',file:'game-hunt-letter.html',sec:'kids',icon:'🚀',n:['HOG Hunt the Letter','HOG صائد الحروف'],d:['A space journey through 10 planets: hunt letters, colours, shapes and numbers with limited energy and careful aim.','رحلة فضائية عبر 10 كواكب: اصطد الحروف والألوان والأشكال والأرقام بطاقة محدودة وتصويب دقيق.'],plan:0},
  {id:'hog-purple',file:'game-purple.html',sec:'nook',icon:'🟣',n:["HOG Don't Touch the Purple",'HOG لا تلمس البنفسجي'],d:['Tap the right colour, memorise the lights, and never touch the purple trap.','المس اللون الصحيح، احفظ ترتيب الأضواء، ولا تلمس فخ البنفسجي أبدًا.'],plan:0},
  {id:'hog-cue-clash',file:'game-cue-clash.html',sec:'pitch',icon:'🎱',n:['HOG Cue Clash','HOG كيو كلاش'],d:['Offline pool with 5 game modes, spin, fine aim and CPU levels.','بلياردو بدون إنترنت بخمسة أنماط وتحكم بالدوران وتصويب دقيق ومستويات كمبيوتر.'],plan:0},
@@ -1892,7 +1893,7 @@ const libDB=()=>new Promise((res,rej)=>{const q=indexedDB.open('ga_lib',1);q.onu
 const libOp=async(m,f)=>{const d=await libDB();return new Promise((res,rej)=>{const t=d.transaction('b',m),s=t.objectStore('b'),r=f(s);t.oncomplete=()=>res(r&&r.result);t.onerror=()=>rej(t.error)})};
 const libAll=()=>libOp('readonly',s=>s.getAll());
 function chunkText(t){t=t.replace(/\r/g,'').replace(/[ \t]+/g,' ');const paras=t.split(/\n\s*\n|\n/).map(x=>x.trim()).filter(Boolean);const out=[];let cur='';for(const p of paras){if((cur+" "+p).length>600&&cur){out.push(cur);cur=cur.slice(-120)+' '+p}else cur=(cur?cur+' ':'')+p;while(cur.length>1100){out.push(cur.slice(0,900));cur=cur.slice(780)}}if(cur.trim().length>30)out.push(cur);return out}
-async function pdfAll(f,cb){await loadScript(URL_PDF);pdfjsLib.GlobalWorkerOptions.workerSrc=URL_PDFW;const d=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;let t='';const N=Math.min(d.numPages,800);for(let i=1;i<=N;i++){const pg=await d.getPage(i);const c=await pg.getTextContent();t+=c.items.map(x=>x.str+(x.hasEOL?'\n':' ')).join('')+'\n\n';if(i%10===0)cb&&cb(i,N)}return t}
+async function pdfAll(f,cb){await loadScript(URL_PDF);pdfjsLib.GlobalWorkerOptions.workerSrc=URL_PDFW;const d=await pdfjsLib.getDocument({data:await f.arrayBuffer(),isEvalSupported:false,enableXfa:false}).promise;let t='';const N=Math.min(d.numPages,800);for(let i=1;i<=N;i++){const pg=await d.getPage(i);const c=await pg.getTextContent();t+=c.items.map(x=>x.str+(x.hasEOL?'\n':' ')).join('')+'\n\n';if(i%10===0)cb&&cb(i,N)}return t}
 const tok=s=>nz(s).split(' ').filter(w=>w.length>1).map(w=>/^[ء-ي]/.test(w)&&w.length>4?w.replace(/^(وال|بال|لل|ال|و)/,''):w);
 function bm25(chunks,q,k){const qt=[...new Set(tok(q))];if(!qt.length)return[];const T=chunks.map(c=>tok(c)),N=T.length,avg=T.reduce((a,x)=>a+x.length,0)/N||1,df={};T.forEach(t=>new Set(t).forEach(w=>df[w]=(df[w]||0)+1));
  const sc=T.map((t,i)=>{const f={};t.forEach(w=>f[w]=(f[w]||0)+1);let s=0;for(const w of qt){const n=f[w]||0;if(!n)continue;const idf=Math.log(1+(N-(df[w]||0)+.5)/((df[w]||0)+.5));s+=idf*n*2.2/(n+1.2*(.25+.75*t.length/avg))}return [s,i]}).filter(x=>x[0]>0).sort((a,b)=>b[0]-a[0]).slice(0,k);return sc.map(x=>({i:x[1],s:x[0]}))}
