@@ -1281,7 +1281,6 @@ async function chatSend(){
   if(llmReady()&&can('ai'))return chatLLM(text);
   return agentMsg(`${tr('I did not catch a game idea. Pick a template, or paste your lesson / attach files and I will turn them into questions.','لم أفهم فكرة لعبة. اختر قالبًا، أو ألصق درسك / أرفق ملفاتك وسأحوّلها إلى أسئلة.')}<div class="row" style="margin-top:8px"><button class="btn sm" onclick="pickTpl('edu')">🎓 ${tr('Education','التعليم')}</button><button class="btn alt sm" onclick="pickTpl('quran')">🕌 ${tr('Quran','القرآن')}</button><button class="btn alt sm" onclick="pickTpl('sports')">🏰 ${tr('Sports','الرياضة')}</button></div>`);
  }
- if(!files.length&&llmReady()&&can('ai')&&text.length<=1500&&!/\n.*\n.*\n/.test(text))return chatLLM(text);
  return chatMaterials(files,text);
 }
 async function chatLLM(text){const b=agentMsg('<span class="spin"></span>');try{const r=await llmRaw(`You are HOG Gamify Anything, a friendly assistant that builds 2-player quiz competitions (Education, Quran, Sports templates, custom templates, uploaded materials). Reply in the user's language in at most 4 short sentences and suggest one concrete next step.\nUser: ${text}`,400);b.innerHTML=esc(r).replace(/\n/g,'<br>');voiceSay(r)}catch(e){b.innerHTML=esc(tr('AI unavailable: ','الذكاء الاصطناعي غير متاح: ')+(AGT.explain(e.message)||e.message))+`<div class="row" style="margin-top:8px"><button class="btn sm" onclick="agtOpen()">🩺 ${tr('Check the agent','افحص الوكيل')}</button></div>`}}
@@ -1496,7 +1495,7 @@ async function runMission(task,prev){
  const b=agentMsg(`<div class="mis"><b>🎯 ${tr('Mission started','بدأت المهمة')}</b><div class="mrail"><span class="mdia" id="mdia">💎</span>${names.map((n,i)=>`<div class="mn" id="mn${i}"><i>${n[0]}</i>${n[1]}<br><small>${n[2]}</small></div>`).join('')}</div><div class="mlog" id="mlog"></div><div id="mres"></div></div>`);
  const log=t=>{const l=b.querySelector('#mlog');if(l){l.insertAdjacentHTML('beforeend','<div>'+esc(t)+'</div>');l.scrollTop=1e5}};
  const set=(i,c)=>{const n=b.querySelector('#mn'+i);if(!n)return;n.className='mn '+c;if(c==='run'){const d=b.querySelector('#mdia'),r=b.querySelector('.mrail');if(d&&r){d.style.left=(n.offsetLeft+n.offsetWidth/2-10)+'px'}}};
- const stop=m=>{M0.busy=false;const ex=AGT.explain(m);log('⚠️ '+m);if(ex)log('💡 '+ex);const rs=b.querySelector('#mres');if(rs)rs.innerHTML=`<div class="card" style="margin-top:10px"><b>⛔ ${tr('The mission stopped — nothing was faked.','توقفت المهمة — ولم يُعرض شيء كمنجز.')}</b><p class="mut">${esc(ex||m)}</p><div class="row"><button class="btn sm" onclick="agtOpen()">🩺 ${tr('Diagnose','شخّص المشكلة')}</button><button class="btn alt sm" onclick="aiSettings()">🔑 ${tr('Key settings','إعدادات المفتاح')}</button></div></div>`;voiceSay(ex||m)};
+ const stop=m=>{M0.busy=false;const ex=AGT.explain(m);log('⚠️ '+m);if(ex)log('💡 '+ex);const rs=b.querySelector('#mres');if(rs&&!rs.innerHTML.trim())rs.innerHTML=`<div class="card" style="margin-top:10px"><b>⛔ ${tr('The mission stopped — nothing was faked.','توقفت المهمة — ولم يُعرض شيء كمنجز.')}</b><p class="mut">${esc(ex||m)}</p><div class="row"><button class="btn sm" onclick="agtOpen()">🩺 ${tr('Diagnose','شخّص المشكلة')}</button><button class="btn alt sm" onclick="aiSettings()">🔑 ${tr('Key settings','إعدادات المفتاح')}</button></div></div>`;voiceSay(ex||m)};
  try{
   set(0,'run');log(tr('Understanding your request…','أفهم طلبك…'));let plan;
   try{plan=parseJ(await stageCall('think','USER REQUEST:\n'+task))}catch(e){throw new Error('THINK: '+e.message)}
@@ -2383,6 +2382,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden){const p=F
 window.fqUser=()=>qtOpen();
 
 /* ================= v27: HOG Video Studio (quiz + explanation video generators) ================= */
+if(!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){r=Math.min(+r||0,w/2,h/2);this.moveTo(x+r,y);this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);this.closePath()}}
 window.VG=window.VG||{type:'quiz',style:'white',fmt:'9:16',n:5,voice:'Kore',useVoice:true,wm:'',topic:'',src:'bank',script:null,busy:false};
 const VG_STY={white:['✍️',tr('Whiteboard','سبورة')],motion:['🎞️',tr('Motion graphic','موشن جرافيك')],stick:['🕴️',tr('Stickman','ستيك مان')]};
 const VG_VOICES=['Kore','Puck','Charon','Aoede','Fenrir','Leda','Zephyr','Orus'];
@@ -2392,7 +2392,7 @@ const vgE=(t,a=0,b=1)=>Math.min(1,Math.max(0,(t-a)/(b-a)));const vgO=x=>1-Math.p
 /* ---- Gemini TTS ---- */
 VG.tts=async function(text,voice,tries=3){const key=VG.gkey();if(!key||!text)return null;
  for(let k=0;k<tries;k++){try{const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify({contents:[{parts:[{text}]}],generationConfig:{responseModalities:['AUDIO'],speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName:voice}}}}})});
-  if(r.status===429){await new Promise(z=>setTimeout(z,(k+1)*8000));continue}if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json();const d=j.candidates&&j.candidates[0]&&j.candidates[0].content.parts.find(p=>p.inlineData);if(!d)throw new Error('no audio');
+  if(r.status===429){if(k===tries-1){SH.log('tts-fail','429');return {err:'HTTP 429 (quota/rate limit)'}}await new Promise(z=>setTimeout(z,(k+1)*8000));continue}if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json();const d=j.candidates&&j.candidates[0]&&j.candidates[0].content.parts.find(p=>p.inlineData);if(!d)throw new Error('no audio');
   return VG.pcm(d.inlineData.data)}catch(e){if(k===tries-1){SH.log('tts-fail',e.message);return {err:e.message}}}}return null};
 VG.pcm=b64=>{const bin=atob(b64),n=bin.length>>1,f=new Float32Array(n);for(let i=0;i<n;i++){let v=bin.charCodeAt(2*i)|(bin.charCodeAt(2*i+1)<<8);if(v>32767)v-=65536;f[i]=v/32768}return{samples:f,rate:24000,dur:n/24000}};
 /* ---- script generation ---- */
@@ -2402,7 +2402,7 @@ VG.localScript=async function(){const ar=UI==='ar';
   a.forEach(x=>{const o=x.options.slice(0,4);const c=x.correctIndex<4?x.correctIndex:0;if(x.correctIndex>=4){o[0]=x.options[x.correctIndex]}sc.push({k:'q',q:x.question,o,c:x.correctIndex<4?x.correctIndex:0,e:x.explanation||'',n:x.question+' '+o.map((z,i)=>'ABCD'[i]+', '+z).join('. '),n2:tr('The answer is ','الإجابة الصحيحة: ')+o[c]+'. '+(x.explanation||'')})});
   sc.push({k:'cta',t:tr('How many did you get? Tell us in the comments!','كم أجبت؟ اكتب نتيجتك في التعليقات!'),n:tr('How many did you get? Tell us in the comments!','كم أجبت؟ اكتب نتيجتك في التعليقات!')});return{title:VG.topic||tr('Quiz','مسابقة'),scenes:sc}}
  const txt=(VG.topic||'').trim();if(txt.length<30)throw new Error(tr('Paste the lesson text (a few sentences) or add an AI key.','الصق نص الدرس (بضع جمل) أو أضف مفتاح AI.'));
- const st=HL.taskDecomposer(txt).slice(0,VG.n+2);const sc=[{k:'hook',t:st[0].text.slice(0,70),n:st[0].text}];st.slice(1).forEach((s,i)=>sc.push({k:'step',i:i+1,t:tr('Step ','الخطوة ')+(i+1),d:s.text,ic:['💡','🔎','✏️','🧩','🚀','✅'][i%6],n:s.text}));sc.push({k:'recap',t:tr('Now you know it!','والآن أصبحت تعرفها!'),n:tr('Now you know it!','والآن أصبحت تعرفها!')},{k:'cta',t:tr('Follow for more lessons','تابعنا لمزيد من الدروس'),n:tr('Follow for more lessons','تابعنا لمزيد من الدروس')});return{title:st[0].text.slice(0,40),scenes:sc}};
+ const st=HL.taskDecomposer(txt).slice(0,VG.n+2);if(st.length<2)throw new Error(tr('Write at least 2 sentences so there are steps to explain.','اكتب جملتين على الأقل ليكون هناك خطوات للشرح.'));const sc=[{k:'hook',t:st[0].text.slice(0,70),n:st[0].text}];st.slice(1).forEach((s,i)=>sc.push({k:'step',i:i+1,t:tr('Step ','الخطوة ')+(i+1),d:s.text,ic:['💡','🔎','✏️','🧩','🚀','✅'][i%6],n:s.text}));sc.push({k:'recap',t:tr('Now you know it!','والآن أصبحت تعرفها!'),n:tr('Now you know it!','والآن أصبحت تعرفها!')},{k:'cta',t:tr('Follow for more lessons','تابعنا لمزيد من الدروس'),n:tr('Follow for more lessons','تابعنا لمزيد من الدروس')});return{title:st[0].text.slice(0,40),scenes:sc}};
 VG.aiScript=async function(){const lang=UI==='ar'?'Arabic':'English';const q=VG.type==='quiz';
  const p=q?`Create a quiz video script about: ${VG.topic}. Language: ${lang}. Exactly ${VG.n} multiple-choice questions with 3 or 4 options, one correct. Use only well-established, verifiable facts; skip anything disputed. Return ONLY JSON: {"title":"","scenes":[{"k":"hook","t":"short hook","n":"narration"},{"k":"q","q":"","o":["","",""],"c":0,"e":"one-line explanation","n":"narration reading the question and options","n2":"narration giving the answer and explanation"},{"k":"cta","t":"","n":""}]}`
   :`Create a step-by-step explainer video script about: ${VG.topic}. Language: ${lang}. Exactly ${VG.n} steps, each short. Use only well-established facts. Return ONLY JSON: {"title":"","scenes":[{"k":"hook","t":"short hook","n":"narration"},{"k":"step","i":1,"t":"short step title","d":"one-sentence detail","ic":"one emoji","n":"narration"},{"k":"recap","t":"one-line recap","n":""},{"k":"cta","t":"","n":""}]}`;
@@ -2445,12 +2445,12 @@ const t_=x=>x;
 /* ---- playback + recording ---- */
 VG.play=async function(sc,audio,rec){const [W,H]=VG.dims();const cv=document.createElement('canvas');cv.width=W;cv.height=H;const c=cv.getContext('2d');const tl=VG.timeline(sc,audio);
  let ac=null,dest=null,mr=null,chunks=[];
- if(rec){ac=new (window.AudioContext||window.webkitAudioContext)();dest=ac.createMediaStreamDestination();const st=cv.captureStream(30);dest.stream.getAudioTracks().forEach(tk=>st.addTrack(tk));const mt=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(m=>window.MediaRecorder&&MediaRecorder.isTypeSupported(m));if(!mt)throw new Error(tr('This browser cannot record video','هذا المتصفح لا يدعم تسجيل الفيديو'));mr=new MediaRecorder(st,{mimeType:mt,videoBitsPerSecond:2500000});mr.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};mr.start(500);
+ if(rec){ac=VG.ac||new (window.AudioContext||window.webkitAudioContext)();VG.ac=null;try{await ac.resume()}catch(e){}dest=ac.createMediaStreamDestination();try{VG.sil=ac.createOscillator();const sg=ac.createGain();sg.gain.value=0;VG.sil.connect(sg);sg.connect(dest);VG.sil.start()}catch(e){}/* silent keep-alive so the recorder always has a live audio track */const st=cv.captureStream(30);dest.stream.getAudioTracks().forEach(tk=>st.addTrack(tk));const mt=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(m=>window.MediaRecorder&&MediaRecorder.isTypeSupported(m));if(!mt)throw new Error(tr('This browser cannot record video','هذا المتصفح لا يدعم تسجيل الفيديو'));mr=new MediaRecorder(st,{mimeType:mt,videoBitsPerSecond:2500000});mr.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};mr.start(500);
   if(audio){tl.segs.forEach(g=>{const a=g.ak&&audio[g.ak];if(a&&a.samples){const b=ac.createBuffer(1,a.samples.length,a.rate);b.copyToChannel(a.samples,0);const s=ac.createBufferSource();s.buffer=b;s.connect(dest);s.start(ac.currentTime+.1+g.t0+.15)}})}}
  const host=VG.host;if(host){host.innerHTML='';host.appendChild(cv);cv.style.cssText='width:100%;max-height:60vh;object-fit:contain;border-radius:12px;background:#000'}
  const t0=performance.now()+(rec?100:0);let seg=null;
  await new Promise(res=>{const loop=()=>{const gt=Math.max(0,(performance.now()-t0)/1000);if(gt>=tl.total){res();return}seg=tl.segs.find(g=>gt>=g.t0&&gt<g.t0+g.dur)||tl.segs[tl.segs.length-1];VG.draw(c,W,H,seg,gt-seg.t0,gt,tl.total);if(VG.prog)VG.prog(gt/tl.total);requestAnimationFrame(loop)};loop()});
- if(rec){await new Promise(r=>{mr.onstop=r;mr.stop()});ac.close();return new Blob(chunks,{type:'video/webm'})}return null};
+ if(rec){await new Promise(r=>{mr.onstop=r;mr.stop()});try{VG.sil&&VG.sil.stop()}catch(e){}VG.sil=null;ac.close();return new Blob(chunks,{type:'video/webm'})}return null};
 /* ---- UI ---- */
 window.vgView=function(){TAB='vidgen';nav();clearTimer();if(!can('video_gen'))return stage(lockCard('video_gen'));
  const gk=VG.gkey(),ai=llmReady();
@@ -2464,15 +2464,16 @@ window.vgView=function(){TAB='vidgen';nav();clearTimer();if(!can('video_gen'))re
  <input id="vgwm" class="inp" style="width:100%;margin-top:8px" maxlength="40" placeholder="${tr('Moving watermark text (optional)','نص علامة مائية متحركة (اختياري)')}" value="${esc(VG.wm)}">
  <div class="mut" style="margin-top:6px">${ai?'🧠 '+tr('AI script on','سكربت AI مفعّل'):'⚠️ '+tr('No AI key: the script is built locally (bank questions / your text).','لا مفتاح AI: يُبنى السكربت محليًّا (أسئلة البنك / نصّك).')}</div>
  <button class="btn" id="vggo" style="width:100%;margin-top:10px" onclick="vgGo()">🎬 ${tr('Create video','أنشئ الفيديو')}</button><div id="vgst" class="mut" style="margin-top:6px"></div><div id="vgprog" style="height:6px;border-radius:9px;background:var(--soft2);margin-top:6px;overflow:hidden;display:none"><div style="height:100%;width:0;background:var(--acc)"></div></div><div id="vghost" style="margin-top:10px"></div></div>${hint}`)};
-window.vgSaveKey=()=>{const v=$('#vgk').value.trim();if(!v)return;const g=SH.agentGuard('');try{localStorage.setItem('ga_gkey',v)}catch(e){}toast('✅ '+tr('Key saved on this device','حُفظ المفتاح على هذا الجهاز'),2200);vgView()};
-window.vgGo=async function(){if(VG.busy)return;VG.busy=true;const b=$('#vggo');b.disabled=true;const st=$('#vgst'),pg=$('#vgprog');const say=t=>{st.innerHTML=t};
+window.vgSaveKey=()=>{const v=$('#vgk').value.trim();if(!v)return;if(!/^AIza[0-9A-Za-z_-]{30,}$/.test(v))return toast('⚠️ '+tr('This does not look like a Gemini key (starts with AIza…)','هذا لا يشبه مفتاح Gemini (يبدأ بـ AIza…)'),3500);try{localStorage.setItem('ga_gkey',v)}catch(e){}toast('✅ '+tr('Key saved on this device','حُفظ المفتاح على هذا الجهاز'),2200);vgView()};
+window.vgGo=async function(){if(VG.busy)return;VG.busy=true;const b=$('#vggo');b.disabled=true;try{VG.ac=new (window.AudioContext||window.webkitAudioContext)();VG.ac.resume()}catch(e){VG.ac=null}
+ const st=$('#vgst'),pg=$('#vgprog');const say=t=>{st.innerHTML=t};
  try{VG.topic=$('#vgt').value.trim();VG.wm=$('#vgwm').value.trim();
   say('✍️ '+tr('Writing the script…','أكتب السكربت…'));let sc;if(llmReady()&&VG.topic.length>2){try{sc=await VG.aiScript()}catch(e){say('⚠️ '+esc(e.message)+' — '+tr('using local script','سأستخدم السكربت المحلي'));sc=await VG.localScript()}}else sc=await VG.localScript();
   VG.script=sc;let audio=null;
   if(VG.useVoice&&VG.gkey()){audio={};const tl0=sc.scenes;let k=0;const total=tl0.reduce((a,s)=>a+(s.k==='q'?2:1),0);for(let i=0;i<tl0.length;i++){const s=tl0[i];for(const [key,txt] of (s.k==='q'?[[i+'a',s.n],[i+'b',s.n2]]:[[i+'a',s.n||s.t]])){say('🎙️ '+tr('Recording the voice','أسجّل الصوت')+` ${++k}/${total}…`);const r=await VG.tts(txt,VG.voice);if(r&&r.err){say('⚠️ '+tr('Voice failed (','تعذّر الصوت (')+esc(r.err)+tr('). Continuing silent.','). سأكمل بدون صوت.'));audio=null;break}if(r)audio[key]=r}if(!audio)break}}
   say('🎬 '+tr('Recording — keep this screen open until it ends','أسجّل الآن — أبقِ هذه الشاشة مفتوحة حتى تنتهي'));pg.style.display='block';VG.prog=p=>{pg.firstChild.style.width=Math.round(p*100)+'%'};VG.host=$('#vghost');
-  const blob=await VG.play(sc,audio,true);pg.style.display='none';const url=URL.createObjectURL(blob);VG.host.innerHTML=`<video controls playsinline src="${url}" style="width:100%;max-height:60vh;border-radius:12px;background:#000"></video><div class="row" style="margin-top:8px"><a class="btn" download="HOG-video.webm" href="${url}">⬇ ${tr('Download .webm','تنزيل .webm')}</a></div><p class="mut" style="font-size:12px">${audio?'🎙️ '+tr('With Gemini voice','بصوت Gemini'):'🔇 '+tr('Silent (add a Gemini key for voice)','صامت (أضف مفتاح Gemini للصوت)')}</p>`;say('✅ '+tr('Done','تم'))}
- catch(e){say('⚠️ '+esc(e.message||e))}finally{VG.busy=false;b.disabled=false}};
+  const blob=await VG.play(sc,audio,true);pg.style.display='none';if(VG.url)try{URL.revokeObjectURL(VG.url)}catch(e){}const url=VG.url=URL.createObjectURL(blob);VG.host.innerHTML=`<video controls playsinline src="${url}" style="width:100%;max-height:60vh;border-radius:12px;background:#000"></video><div class="row" style="margin-top:8px"><a class="btn" download="HOG-video.webm" href="${url}">⬇ ${tr('Download .webm','تنزيل .webm')}</a></div><p class="mut" style="font-size:12px">${audio?'🎙️ '+tr('With Gemini voice','بصوت Gemini'):'🔇 '+tr('Silent (add a Gemini key for voice)','صامت (أضف مفتاح Gemini للصوت)')}</p>`;say('✅ '+tr('Done','تم'))}
+ catch(e){say('⚠️ '+esc(e.message||e))}finally{try{VG.ac&&VG.ac.close()}catch(e){}VG.ac=null;VG.busy=false;b.disabled=false}};
 
 /* ============ v28: Agent Doctor + smart routing + provider auto-heal ============ */
 const AGT={
@@ -2486,7 +2487,7 @@ const AGT={
  fix(c){const d=AGT.detect(c.key);if(!d)return {cfg:c,changed:false};
   let bad=false;
   if(d.host){bad=!(c.url||'').includes(d.host)&&!(d.k==='a'&&!c.url&&c.provider==='anthropic');if(d.k==='a')bad=c.provider!=='anthropic'}
-  else bad=c.provider==='anthropic';
+  else bad=c.provider==='anthropic'&&!c.url;
   if(!bad)return {cfg:c,changed:false};
   return {cfg:Object.assign({},c,{provider:d.provider,url:d.url,model:d.model}),changed:true,name:d.name}},
  explain(m){m=String(m||'');
@@ -2499,29 +2500,26 @@ const AGT={
   if(/HTTP 5\d\d/.test(m))return tr('The provider server has a problem: retry shortly.','مشكلة في خادم المزوّد: أعد المحاولة بعد قليل.');
   return ''},
  wantsBuild(t){if(RX.mk.test(t))return true;
-  const g=/(game|لعبة|لعبه|العاب|ألعاب|مسابقة|مسابقه|تحدي|puzzle|لغز|ألغاز|quiz|اختبار)/i.test(t),v=/(أريد|اريد|عايز|عاوز|محتاج|ابغى|بدي|اصنع|اعمل|أنشئ|انشئ|صمم|برمج|want|need|make|build|create|design|i'd like)/i.test(t);
-  return g&&v&&t.length<=1800}
+  const g=/(game|لعبة|لعبه|العاب|ألعاب)/i.test(t),v=/(أريد|اريد|عايز|عاوز|محتاج|ابغى|بدي|اصنع|اعمل|أنشئ|انشئ|صمم|برمج|want|need|make|build|create|design|i'd like)/i.test(t);
+  return g&&v&&t.length<=500}
 };
 /* wrong-provider key is silently corrected in memory, so the call goes to the right place */
 {const _cfg=llmCfg;llmCfg=function(){const r=AGT.fix(_cfg());return r.cfg}}
 /* aiSave: show what was auto-corrected */
-aiSave=function(){const raw={provider:$('#ap').value,url:$('#au').value.trim(),model:$('#am').value.trim(),key:$('#ak').value.trim()};const f=AGT.fix(raw);store('ga_llm',f.cfg);aiPill();closeModal();
+{const _sv=aiSave;aiSave=function(){const r=_sv.apply(this,arguments);
+ if($('#modal').classList.contains('on'))return r;/* modal still open = Shield blocked the save: do nothing more */
+ const cur=store('ga_llm');if(!cur)return r;const f=AGT.fix(cur);if(f.changed)store('ga_llm',f.cfg);aiPill();
  toast('🔌 '+(llmReady()?tr('AI connected','تم ربط الذكاء الاصطناعي'):tr('Saved (no key)','تم الحفظ (بدون مفتاح)'))+(f.changed?' · 🔧 '+tr('provider set to '+f.name,'تم ضبط المزوّد: '+f.name):''),f.changed?4500:2500);
- if(llmReady())setTimeout(()=>agtOpen(),600)};
+ if(llmReady())setTimeout(()=>agtOpen(),600);return r}}
 aiTest=function(){aiSave()};
 /* real answers must not be empty; Gemini thinking must not eat the budget */
 {const _raw=llmRaw;llmRaw=async function(content,max){
   const c=llmCfg();let o=content,m=max;
-  if(c.provider!=='anthropic'&&/generativelanguage/.test(c.url||'')){m=Math.max(m||2000,300)*3}
-  let t;try{t=await _raw.call(this,o,m)}catch(e){if(e&&e.name==='AbortError')throw new Error('TIMEOUT '+tr('(170s)','(170 ثانية)'));if(e instanceof TypeError)throw new Error('NETWORK '+e.message);throw e}
+  if(c.provider!=='anthropic'&&/generativelanguage/.test(c.url||'')&&/gemini-2\.5/.test(c.model||'')&&/pro/i.test(c.model||'')){m=Math.min(Math.max(m||2000,300)*2,30000)}
+  let t;try{t=await _raw.call(this,o,m)}catch(e){if(e&&e.name==='AbortError')throw new Error('TIMEOUT '+tr('(170s)','(170 ثانية)'));if(e instanceof TypeError&&/Failed to fetch|NetworkError|Load failed/i.test(e.message))throw new Error('NETWORK '+e.message);if(e instanceof TypeError)throw new Error('BAD_RESPONSE '+e.message);throw e}
   if(typeof t!=='string'||!t.trim())throw new Error('EMPTY_REPLY');return t}}
 /* Gemini 2.5 Flash: turn thinking off so max_tokens is spent on the answer */
-{const _f=window.fetch;window.fetch=function(u,o){try{if(typeof u==='string'&&/generativelanguage\.googleapis\.com\/v1beta\/openai/.test(u)&&o&&typeof o.body==='string'){const b=JSON.parse(o.body);if(!b.reasoning_effort){b.reasoning_effort=/pro/i.test(b.model||'')?'low':'none';o=Object.assign({},o,{body:JSON.stringify(b)})}}}catch(e){}return _f.call(this,u,o)}}
-/* smart router: in chatSend the build intent (not only "اصنع لعبة") reaches the agent */
-{const src=chatSend.toString();
- if(!/AGT\.wantsBuild/.test(src)){/* patched in source below */}}
-
-const AG_STEPS_FULL=['key','ping','prompt','think','build','crit','judge','game'];
+{const _f=window.fetch;window.fetch=function(u,o){try{if(typeof u==='string'&&/generativelanguage\.googleapis\.com\/v1beta\/openai/.test(u)&&o&&typeof o.body==='string'){const b=JSON.parse(o.body);if(!b.reasoning_effort&&/gemini-2\.5/.test(b.model||'')){b.reasoning_effort=/pro/i.test(b.model||'')?'low':'none';o=Object.assign({},o,{body:JSON.stringify(b)})}}}catch(e){}return _f.call(this,u,o)}}
 let AG={busy:false};
 function agtRow(id,ic,name){return `<div id="ag_${id}" style="display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line)"><span style="width:22px;text-align:center" id="ag_${id}_s">⏸</span><div style="flex:1"><b>${ic} ${name}</b><div class="mut" id="ag_${id}_d" style="font-size:12px;word-break:break-word"></div></div></div>`}
 function agtOpen(){const c=llmCfg();showModal(`<h3>🩺 ${tr('Agent Doctor','طبيب الوكيل')}</h3>
@@ -2530,13 +2528,15 @@ function agtOpen(){const c=llmCfg();showModal(`<h3>🩺 ${tr('Agent Doctor','ط�
  <div class="row" style="margin:10px 0"><button class="btn sm" onclick="agtRun(false)">⚡ ${tr('Quick (3 steps)','فحص سريع (3 خطوات)')}</button><button class="btn alt sm" onclick="agtRun(true)">🧪 ${tr('Full (uses more credit)','فحص كامل (يستهلك رصيدًا أكثر)')}</button><button class="btn alt sm" onclick="aiSettings()">🔑 ${tr('Key settings','إعدادات المفتاح')}</button></div>
  <div id="agrows"></div><div id="agsum" style="margin-top:10px"></div>`)}
 async function agtRun(full){
- if(AG.busy)return;AG.busy=true;const rows=[['key','🔑',tr('API key & provider','المفتاح والمزوّد')],['ping','📡','API Health Check'],['prompt','✉️','Prompt Transmission']];
+ if(AG.busy)return;AG.busy=true;try{await agtRun0(full)}finally{AG.busy=false}}
+async function agtRun0(full){
+const rows=[['key','🔑',tr('API key & provider','المفتاح والمزوّد')],['ping','📡','API Health Check'],['prompt','✉️','Prompt Transmission']];
  if(full)rows.push(['think','🧠','THINK'],['build','🛠','EXECUTE'],['crit','🔍','CRITICIZE'],['judge','⚖️','JUDGE'],['game','🎮','Game Generation']);
- const box=$('#agrows');if(!box){AG.busy=false;return}box.innerHTML=rows.map(r=>agtRow(...r)).join('');$('#agsum').innerHTML='';
+ const box=$('#agrows');if(!box)return;box.innerHTML=rows.map(r=>agtRow(...r)).join('');$('#agsum').innerHTML='';
  const set=(id,s,d)=>{const a=$('#ag_'+id+'_s'),b=$('#ag_'+id+'_d');if(a)a.textContent=s;if(b)b.textContent=d||''};
- let failed=null,ctx={};
+ let failed=null,warned=false;
  const step=async(id,fn)=>{if(failed)return set(id,'⏸',tr('Skipped','تم التخطي'));set(id,'⏳','');const t0=Date.now();
-  try{const d=await fn();set(id,d&&d.warn?'⚠️':'✅',((d&&d.msg)||d||'')+' · '+((Date.now()-t0)/1000).toFixed(1)+'s')}
+  try{const d=await fn();if(d&&d.warn)warned=true;set(id,d&&d.warn?'⚠️':'✅',((d&&d.msg)||d||'')+' · '+((Date.now()-t0)/1000).toFixed(1)+'s')}
   catch(e){failed=id;const ex=AGT.explain(e.message);set(id,'❌',(ex?ex+'\n':'')+String(e.message).slice(0,200))}};
  await step('key',async()=>{const c=llmCfg();if(!c.key&&!(SB.user&&SB.owner))throw new Error(tr('No API key saved. Add one in Key settings.','لا يوجد مفتاح محفوظ. أضفه من إعدادات المفتاح.'));const d=AGT.detect(c.key);return (d?d.name+' · ':'')+c.model+(c.key?' · '+'•'.repeat(6)+c.key.slice(-4):'')});
  await step('ping',async()=>{const t=await llmRaw('Reply with the single word OK',20);return tr('Real reply: ','رد حقيقي: ')+t.trim().slice(0,30)});
@@ -2546,12 +2546,11 @@ async function agtRun(full){
   await step('build',async()=>{g=parseGame(await stageCall('build','TASK:\nA tiny Arabic 3-question colors quiz. Keep it UNDER 60 lines.\n\nPLAN:\n'+JSON.stringify(plan)));if(!/<script/i.test(g.html))throw new Error(tr('No playable HTML was produced','لم يُنتج HTML قابل للعب'));return g.html.length+' chars'});
   await step('crit',async()=>{tests=await runTests(g.html);tv=testVerdict(tests);tests.verdict=tv;rev=parseJ(await stageCall('review','TASK:\ncolors quiz\n\nPLAN:\n'+JSON.stringify(plan)+'\n\nAUTOMATED TEST REPORT:\n'+JSON.stringify(tests)+'\n\nGAME HTML:\n'+g.html.slice(0,20000)));return (tv.pass?tr('Sandbox test passed','اختبار العزل نجح'):tr('Sandbox found: ','الاختبار وجد: ')+tv.fails.join('; '))+' · '+tr('critic answered','المراجع أجاب')});
   await step('judge',async()=>{const j=parseJ(await stageCall('judge','TASK:\ncolors quiz\n\nPLAN:\n'+JSON.stringify(plan)+'\n\nAUTOMATED TEST REPORT:\n'+JSON.stringify(tests)+'\n\nREVIEWER:\n'+JSON.stringify(rev)+'\n\nFIX ROUNDS USED: 0\n\nGAME HTML:\n'+g.html.slice(0,15000)));if(!j.scores)throw new Error('JUDGE returned no scores');return Object.values(j.scores).reduce((a,b)=>a+(+b||0),0)+'/100'});
-  await step('game',async()=>{if(!tv.pass)return {warn:1,msg:tr('Generated but not clean: ','تم التوليد لكن غير نظيف: ')+tv.fails.join('; ')};MISSION={busy:false,task:'doctor',html:g.html,title:plan.title||'test'};return tr('Playable game produced. ','لعبة قابلة للتشغيل. ')});ctx.g=g}
- const ok=!failed;store('ga_doctor',{t:Date.now(),ok,full:!!full,failed});
- $('#agsum').innerHTML=ok?`<div class="card" style="text-align:center"><b>✅ ${full?tr('The agent works end to end.','الوكيل يعمل فعليًا من الطرف للطرف.'):tr('Connection and prompt delivery work.','الاتصال ووصول الـPrompt يعملان.')}</b>${full&&MISSION&&MISSION.html?`<div class="row" style="justify-content:center;margin-top:8px"><button class="btn sm" onclick="closeModal();openGame()">▶ ${tr('Play the test game','العب لعبة الاختبار')}</button></div>`:!full?`<div class="row" style="justify-content:center;margin-top:8px"><button class="btn alt sm" onclick="agtRun(true)">🧪 ${tr('Run the full test','شغّل الفحص الكامل')}</button></div>`:''}</div>`:`<div class="card"><b>❌ ${tr('Failed at: ','توقف عند: ')}${esc(failed)}</b><p class="mut" style="margin:6px 0 0">${tr('Fix this, then run again. Nothing was faked as done.','أصلح هذه النقطة ثم أعد الفحص. لم يُعرض أي شيء كمنفّذ وهو غير منفّذ.')}</p></div>`;
- AG.busy=false}
-/* chat commands */
-window.addEventListener('DOMContentLoaded',()=>{});
+  await step('game',async()=>{if(!tv.pass)return {warn:1,msg:tr('Generated but not clean: ','تم التوليد لكن غير نظيف: ')+tv.fails.join('; ')};if(!(MISSION&&MISSION.busy))MISSION={busy:false,task:'doctor',html:g.html,title:plan.title||'test'};return tr('Playable game produced. ','لعبة قابلة للتشغيل. ')});}
+ const ok=!failed;store('ga_doctor',{t:Date.now(),ok,warned,full:!!full,failed});
+ const sm=$('#agsum');if(!sm)return;
+ sm.innerHTML=ok?`<div class="card" style="text-align:center"><b>${warned?'⚠️ '+tr('All stages ran, but the generated test game had problems.','نُفّذت كل المراحل، لكن لعبة الاختبار المولّدة فيها مشكلات.'):'✅ '+(full?tr('The agent works end to end.','الوكيل يعمل فعليًا من الطرف للطرف.'):tr('Connection and prompt delivery work.','الاتصال ووصول الـPrompt يعملان.'))}</b>${full&&!warned&&MISSION&&MISSION.html?`<div class="row" style="justify-content:center;margin-top:8px"><button class="btn sm" onclick="closeModal();openGame()">▶ ${tr('Play the test game','العب لعبة الاختبار')}</button></div>`:!full?`<div class="row" style="justify-content:center;margin-top:8px"><button class="btn alt sm" onclick="agtRun(true)">🧪 ${tr('Run the full test','شغّل الفحص الكامل')}</button></div>`:''}</div>`:`<div class="card"><b>❌ ${tr('Failed at: ','توقف عند: ')}${esc(failed)}</b><p class="mut" style="margin:6px 0 0">${tr('Fix this, then run again. Nothing was faked as done.','أصلح هذه النقطة ثم أعد الفحص. لم يُعرض أي شيء كمنفّذ وهو غير منفّذ.')}</p></div>`;
+}
 </script>
 </body>
 </html>
